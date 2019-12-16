@@ -1,5 +1,9 @@
 <h2><%= @book.title %></h2>
 
+<p>Author:
+  <%= link_to @book.author.name,
+              author_path(@book.author) %></p>
+
 <p>
   <%= @book.description %>
 </p>
