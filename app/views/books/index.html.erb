@@ -1,14 +1,18 @@
-<h2>Books</h2>
+<h2><%= @author.name %> - Books</h2>
 
+<%= link_to 'Add book', new_author_book_path(@author) %>
 
 <% if @books.any? %>
   <ul>
   <% @books.each do |b| %>
     <li>
-      <%= link_to b.title, book_path(b) %>
+      <%= link_to b.title, book_path(b) %> |
+      <%= link_to 'Destroy', [b.author, b],
+                method: :delete,
+                data: { confirm: 'Are you sure?' } %>
     </li>
   <% end %>
   </ul>
 <% else %>
-  No books
+  <p>No books</p>
 <% end %>
