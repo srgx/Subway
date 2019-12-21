@@ -1,7 +1,10 @@
 class BooksController < ApplicationController
   def index
+    p = params[:order]
+    order = p.nil?||p=="asc" ? :asc : :desc
     @author=Author.find(params[:author_id])
-    @books=Book.where(author:@author)
+    @books=Book.where(author:@author).order(title: order)
+
   end
 
   def show
@@ -17,8 +20,9 @@ class BooksController < ApplicationController
     @author=Author.find(params[:author_id])
     @book=Book.new(book_params)
     @book.author=@author
-    
+
     if @book.save
+      flash[:notice] = "Book successfully created!"
       redirect_to author_books_path(@author)
     else
       render 'new'
@@ -32,6 +36,7 @@ class BooksController < ApplicationController
   def update
     @book=Book.find(params[:id])
     if(@book.update(book_params))
+      flash[:notice] = "Book successfully updated!"
       redirect_to author_books_path
     else
       render 'edit'
@@ -41,6 +46,7 @@ class BooksController < ApplicationController
   def destroy
     @book=Book.find(params[:id])
     @book.destroy
+    flash[:notice] = "Book successfully destroyed!"
     redirect_to author_books_path
   end
 

@@ -1,6 +1,19 @@
 <h2>Authors</h2>
 
-<%= link_to 'Add author', new_author_path %>
+<% if flash[:notice] %>
+  <div style="color:green;"><%= flash[:notice] %></div>
+<% end %>
+
+<p>
+  <%= link_to 'Add author', new_author_path %> |
+  Order:
+  <% if params[:order].nil?||params[:order]=="asc" %>
+    <%= link_to 'Desc', authors_path(order: :desc) %>
+  <% else %>
+    <%= link_to 'Asc', authors_path(order: :asc) %>
+  <% end %>
+
+</p>
 
 <ul>
 <% @authors.each do |a| %>

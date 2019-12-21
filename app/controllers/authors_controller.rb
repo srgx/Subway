@@ -1,6 +1,8 @@
 class AuthorsController < ApplicationController
   def index
-    @authors=Author.all
+    p = params[:order]
+    order = p.nil?||p=="asc" ? :asc : :desc
+    @authors=Author.order(name: order)
   end
 
   def show
@@ -16,6 +18,7 @@ class AuthorsController < ApplicationController
     # render plain: params[:author].inspect
     @author=Author.new(author_params)
     if @author.save
+      flash[:notice] = "Author successfully created!"
       redirect_to authors_path
     else
       render 'new'
@@ -29,6 +32,7 @@ class AuthorsController < ApplicationController
   def update
     @author=Author.find(params[:id])
     if(@author.update(author_params))
+      flash[:notice] = "Author successfully updated!"
       redirect_to authors_path
     else
       render 'edit'
@@ -38,6 +42,7 @@ class AuthorsController < ApplicationController
   def destroy
     @author=Author.find(params[:id])
     @author.destroy
+    flash[:notice] = "Author successfully destroyed!"
     redirect_to authors_path
   end
 

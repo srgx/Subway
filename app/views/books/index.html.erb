@@ -1,6 +1,18 @@
 <h2><%= @author.name %> - Books</h2>
 
-<%= link_to 'Add book', new_author_book_path(@author) %>
+<% if flash[:notice] %>
+  <div style="color:green;"><%= flash[:notice] %></div>
+<% end %>
+
+<p>
+  <%= link_to 'Add book', new_author_book_path(@author) %> |
+  Order:
+  <% if params[:order].nil?||params[:order]=="asc" %>
+    <%= link_to 'Desc', author_books_path(order: :desc) %>
+  <% else %>
+    <%= link_to 'Asc', author_books_path(order: :asc) %>
+  <% end %>
+</p>
 
 <% if @books.any? %>
   <ul>
