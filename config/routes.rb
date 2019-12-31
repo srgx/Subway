@@ -6,4 +6,6 @@ Rails.application.routes.draw do
   resources :authors do
     resources :books
   end
+
+  get 'account', to: 'accounts#show'
 end

@@ -8,6 +8,8 @@ class User < ApplicationRecord
   has_one :account
   has_many :articles
 
+  after_create :create_account
+
   def gold
     self.account.gold
   end
@@ -19,4 +21,9 @@ class User < ApplicationRecord
   def wood
     self.account.wood
   end
+
+  private
+    def create_account
+      self.account = Account.new(gold:300,silver:200,wood:100)
+    end
 end
