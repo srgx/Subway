@@ -2,9 +2,7 @@ class BooksController < ApplicationController
   def index
     p = params[:order]
     order = p.nil?||p=="asc" ? :asc : :desc
-    @author=Author.find(params[:author_id])
-    @books=Book.where(author:@author).order(title: order)
-
+    @books=Book.all.order(title: order)
   end
 
   def show

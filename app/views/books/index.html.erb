@@ -1,16 +1,16 @@
-<h2><%= @author.name %> - Books</h2>
+<h2>Books</h2>
 
 <% if flash[:notice] %>
   <div style="color:green;"><%= flash[:notice] %></div>
 <% end %>
 
 <p>
-  <%= link_to 'Add book', new_author_book_path(@author) %> |
+  <%= link_to 'Add book', new_book_path(@author) %> |
   Order:
   <% if params[:order].nil?||params[:order]=="asc" %>
-    <%= link_to 'Desc', author_books_path(order: :desc) %>
+    <%= link_to 'Desc', books_path(order: :desc) %>
   <% else %>
-    <%= link_to 'Asc', author_books_path(order: :asc) %>
+    <%= link_to 'Asc', books_path(order: :asc) %>
   <% end %>
 </p>
 
@@ -18,9 +18,9 @@
   <ul>
   <% @books.each do |b| %>
     <li>
-      <%= link_to b.title, author_book_path(@author,b) %> |
-      <%= link_to 'Edit', edit_author_book_path(@author,b) %> |
-      <%= link_to 'Destroy', [b.author, b],
+      <%= link_to b.title, book_path(b) %> |
+      <%= link_to 'Edit', edit_book_path(b) %> |
+      <%= link_to 'Destroy', b,
                 method: :delete,
                 data: { confirm: 'Are you sure?' } %>
     </li>
