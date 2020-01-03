@@ -1,6 +1,6 @@
-<h1><%= @author.name %> - Add New Book</h1>
+<h1>Add New Book</h1>
 
-<%= form_with(model: [ @author, @author.books.build ], local: true) do |form| %>
+<%= form_with scope: :book , url: books_path, local: true do |form| %>
 
 <% if @book.errors.any? %>
   <div id="error_explanation">
@@ -16,6 +16,11 @@
   </div>
 <% end %>
 
+
+  <p>
+    <%= form.label :author_name %><br>
+    <%= form.text_field :author_name, value: @author_name %>
+  </p>
 
   <p>
     <%= form.label :title %><br>

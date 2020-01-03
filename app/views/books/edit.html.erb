@@ -1,6 +1,6 @@
 <h1>Edit Book</h1>
 
-<%= form_with(model: @book, local: true, url: author_book_path) do |form| %>
+<%= form_with(model: @book, local: true, url: book_path) do |form| %>
 
 <% if @book.errors.any? %>
   <div id="error_explanation">

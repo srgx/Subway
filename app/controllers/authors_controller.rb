@@ -6,8 +6,10 @@ class AuthorsController < ApplicationController
   end
 
   def show
+    p = params[:order]
+    order = p.nil?||p=="asc" ? :asc : :desc
     @author=Author.find(params[:id])
-    @books=@author.books
+    @books=@author.books.order(title: order)
   end
 
   def new

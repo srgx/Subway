@@ -10,18 +10,20 @@ class BooksController < ApplicationController
   end
 
   def new
-    @author=Author.find(params[:author_id])
+    @author_name = params[:author_id].nil? ? nil : Author.find(params[:author_id]).name
     @book=Book.new
   end
 
   def create
-    @author=Author.find(params[:author_id])
     @book=Book.new(book_params)
-    @book.author=@author
+    name = author_params[:author_name]
+    @author = Author.where(name: name).first
+
+    @book.author = @author
 
     if @book.save
       flash[:notice] = "Book successfully created!"
-      redirect_to author_books_path(@author)
+      redirect_to author_path(@author)
     else
       render 'new'
     end
@@ -35,7 +37,7 @@ class BooksController < ApplicationController
     @book=Book.find(params[:id])
     if(@book.update(book_params))
       flash[:notice] = "Book successfully updated!"
-      redirect_to author_books_path
+      redirect_to book_path(@book)
     else
       render 'edit'
     end
@@ -52,4 +54,9 @@ class BooksController < ApplicationController
     def book_params
       params.require(:book).permit(:title, :description)
     end
+
+    def author_params
+      params.require(:book).permit(:author_name)
+    end
+
 end

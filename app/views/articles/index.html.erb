@@ -6,8 +6,7 @@
 <ul>
 <% @articles.each do |a| %>
   <li>
-    <p><%= a.title %></p>
-    <p><%= a.text %></p>
+    <p><%= a.title %>(<%= a.user.email %>)</p>
   </li>
 <% end %>
 </ul>

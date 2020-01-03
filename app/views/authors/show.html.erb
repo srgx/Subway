@@ -1,5 +1,13 @@
 <h2><%= @author.name %></h2>
 
+<%= link_to "Add Book", new_book_path(author_id: @author.id) %>
+
+<% if params[:order].nil?||params[:order]=="asc" %>
+  <%= link_to 'Desc', author_path(@author,order: :desc) %>
+<% else %>
+  <%= link_to 'Asc', author_path(@author, order: :asc) %>
+<% end %>
+
 <ul>
 <% @books.each do |book| %>
   <li>

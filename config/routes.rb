@@ -4,13 +4,11 @@ Rails.application.routes.draw do
   root 'authors#index'
 
   resources :books do
-    resources :comments
+    resources :comments, only: [ :create ]
   end
+
   resources :authors
-
   resources :articles
-
-
 
   get 'account', to: 'accounts#show'
 end
