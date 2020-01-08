@@ -6,7 +6,9 @@
 <ul>
 <% @articles.each do |a| %>
   <li>
-    <p><%= a.title %>(<%= a.user.email %>)</p>
+    <p>
+      <%= link_to a.title, article_path(a) %>(<%= a.user.email %>)
+    </p>
   </li>
 <% end %>
 </ul>

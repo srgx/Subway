@@ -9,11 +9,17 @@ class ArticlesController < ApplicationController
   end
 
   def create
-    if(current_user.articles.create(article_params).valid?)
+    @article = current_user.articles.create(article_params)
+    if(@article.valid?)
       redirect_to articles_path
     else
+      puts "Ups źle"
       render 'new'
     end
+  end
+
+  def show
+    @article = Article.find(params[:id])
   end
 
   private

@@ -22,6 +22,10 @@ class User < ApplicationRecord
     self.account.wood
   end
 
+  def name
+    self.account.name
+  end
+
   private
     def create_account
       self.account = Account.new(gold:300,silver:200,wood:100)

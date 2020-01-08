@@ -10,5 +10,7 @@ Rails.application.routes.draw do
   resources :authors
   resources :articles
 
-  get 'account', to: 'accounts#show'
+  #get 'account', to: 'accounts#show'
+  resource :account
+
 end
