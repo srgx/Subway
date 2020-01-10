@@ -5,3 +5,26 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
+
+
+10.times { Author.create(name: Faker::Name.unique.first_name) }
+
+authors = Author.all
+authors.each do |a|
+  5.times do
+    a.books.create(
+      title: Faker::Book.unique.title,
+      description: Faker::Lorem.sentence
+    )
+  end
+end
+
+books = Book.all
+books.each do |b|
+  5.times do
+    b.comments.create(
+      commenter:Faker::Name.first_name,
+      body: Faker::Lorem.sentence
+    )
+  end
+end
