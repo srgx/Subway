@@ -1,0 +1,108 @@
+<h2>Active Record Basics</h2>
+
+<ul>
+
+  <li>
+    <p>
+      Active Record to model w skrócie MVC. To warstwa systemu odpowiedzialna za
+      reprezentowanie danych i logiki biznesowej. AR ułatwia tworzenie i używanie
+      obiektów, których dane wymagają stałego przechowywania w bazie. AR to dane
+      i zachowania związane z tymi danymi. Połączenie logiki z obiektem sprawia,
+      że jego użytkownicy będą wiedzieli jak go używać, jak zapisywać i odczytywać
+      informacje. ORM łączy obiekty aplikacji z tabelami bazy danych. Dzięki temu
+      nie jest konieczne pisanie zapytań SQL. AR to modele i ich dane, powiązania
+      między modelami, hierarchie dziedziczenia, sprawdzanie poprawności danych a
+      także zorientowane obiektowo działania na bazie danych.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      W trakcie pisania aplikacji w innych językach programowania lub frameworkach
+      konieczne może być użycie dużej ilości kodu konfiguracyjnego. RoR zakłada,
+      że jeśli użytkownik stosuje się do ogólnie przyjętych konwencji nie będzie musiał
+      konfigurować zbyt wiele. Poza nielicznymi wyjątkami, konfiguracja aplikacji
+      będzie zawsze taka sama. Rails używa konwencji nazw do modeli i bazy danych.
+      Chodzi o to że nazwa klasy np Book zostaje ustawiona jako tabela books w bazie.
+      Działa to dla różnych słów regularnych i nieregularnych. Kiedy używa się modeli
+      z wieloma słowami trzeba użyć CamelCase a nazwa tabeli musi być z undescorami.
+      Na przykład klasa BookClub to tabela book_clubs, Deer - deers, Mouse - mice,
+      Person - people, LineItem - line_items. Są też konwencje dla kolumn w bazie
+      danych. Klucze obce to nazwa_id, item_id, order_id. Klucze główne to domyślnie
+      id. Są też inne nazwy kolumn np created_at, updated_at, lock_version, type, count.
+      Te opcjonalne nazwy są zarezerwowane przez Active Record dlatego lepiej ich unikać
+      i używać innych słów o podobnym znaczeniu.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Aby stworzyć model AR wystarczy klasa dziedzicząca po ApplicationRecord, np
+      "class Product < ApplicationRecord". Model będzie mapowany do tabeli products.
+      Kolumny dostępne będą jako atrybuty obiektu. Jeżeli tabela powstała przy
+      użyciu zapytania "CREATE TABLE products (id int(11) NOT NULL auto_increment,
+      name varchar(255),PRIMARY KEY  (id));" będzie można napisać p = Product.new,
+      p.name = "Some Book", puts p.name.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Jeżeli używana jest stara baza danych konwencje nazw mogą być w łatwy sposób
+      zmienione. Wystarczy użyć metody self.table_name = "my_products" aby zmienic nazwe
+      tabeli. W takim przypadku należy też zmienić nazwe klasy z fixturami.
+      "set_fixture_class my_products: Product, fixtures :my_products". Można też
+      zmienić kolumnę używaną jako klucz główny używając metody "self.primary_key = "product_id"".
+    </p>
+  </li>
+
+  <li>
+    <p>
+      CRUD - Obiekty mogą być tworzone z hasza, bloku, albo można ustawiać ich atrybuty
+      ręcznie po utworzeniu. Metoda new tworzy nowy obiekt a metoda create tworzy go
+      i zapisuje w bazie danych. Np "user = User.create(name: "David", occupation: "Code Artist")".
+      Bez zapisywania - "user = User.new, user.name = "David", user.occupation = "Code Artist"".
+      Dopiero user.save zapisze obiekt w bazie. Można też użyć bloku "user = User.new do |u|,
+      u.name = "David", u.occupation = "Code Artist" end". Odczytywanie, wszyscy użytkownicy -
+      "User.all", pierwszy - "User.first",o imieniu 'David' - "david = User.find_by(name: 'David')",
+      złożone zapytanie - "users = User.where(name: 'David', occupation: 'Code Artist').order(created_at: :desc)".
+      Model można zupdatować np "user = User.find_by(name: 'David'), user.name = 'Dave', user.save".
+      Można też użyć metody update, również dla wielu atrybutów "user.update(name: 'Dave')".
+      Aby uaktualnić wszystkie rekordy - "User.update_all "max_login_attempts = 3, must_change_password = 'true'"".
+      Usuwanie rekordu - "User.destroy", "User.destroy_by(name: 'David')" albo
+      "User.destroy_all".
+    </p>
+  </li>
+
+  <li>
+    <p>
+      AR pozwala na sprawdzanie poprawnosci danych przed zapisanie w bazie danych.
+      Można sprawdzic czy model nie jest pust, czy jest unikalny albo czy ma go
+      już w bazie danych. Metody save i update zwracaja false jeżeli model był
+      niepoprawny i nie zapisują go w bazie. Są też metody save! i update!
+      generujące błąd w przypadku nieprawidłowego modelu. Np jeżeli w modelu User
+      "validates :name, presence: true", to dla pustego użytkownika user.save zwróci
+      false a user.save! błąd "ActiveRecord::RecordInvalid: Validation failed:
+      Name can't be blank".
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Callbacki pozwalają na uruchamianie fragmentów programu w różnych momentach
+      życia modeli, np kiedy są one tworzone, aktualizowane lub usuwane.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      RoR używa specjalnego DSL do zarządzania schematem bazy danych. Migracje są
+      przechowywane w plikach wykonywanych na bazie danych, gdzie można użyć Active
+      Record przy pomocy rake. RoR śledzi, które pliki zostały użyte na bazie i
+      pozwala na cofnięcie dokonanych zmian - rollback. Aby stworzyc tabele należy
+      uzyć "rails db:migrate", aby cofnąć zmiany - "rails db:rollback". Pliki migracji
+      są niezależne od rodzaju bazy danych, np MySQL, PostgreSQL, Oracle.
+    <p>
+  </li>
+
+</ul>

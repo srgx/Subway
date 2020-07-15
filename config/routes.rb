@@ -1,7 +1,14 @@
 Rails.application.routes.draw do
   devise_for :users
-  # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
-  root 'authors#index'
+
+  root 'guides#index'
+
+  get 'guides/basics'
+  get 'guides/migrations'
+  get 'guides/validations'
+  get 'guides/callbacks'
+  get 'guides/associations'
+  get 'guides/interface'
 
   resources :books do
     resources :comments, only: [ :create ]
