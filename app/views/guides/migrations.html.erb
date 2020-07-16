@@ -1,3 +1,137 @@
 <h2>Active Record Migrations</h2>
 
-<li></li>
+<ul>
+
+	<li>
+		<p>
+			Migracje pozwalają w łatwy sposób na zmiane schematu bazy danych. Stosuje się w nich
+			DSL dlatego nie trzeba wpisywać ręcznie zapytań SQL. Dzięki temu aplikacja jest niezależna
+			od używanej bazy danych. Każda migracja to nowa wersja bazy danych. Dodawane lub usuwane
+			są kolumny, tabele, rekordy. AR za każdym razem uaktualnia plik schema.rb tak aby odpowiadał
+			obecnej strukturze bazy danych. Przykładowa migracja tworzy tabelę produkty z kolumnami name
+			i description. Tabela będzie też miała kolumne id z kluczem głównym. Timestamps to kolumny
+			created_at i updated_at. Po uruchomieniu migracji powstanie tabela, którą będzie można usunąć
+			dzięki funkcji rollback. W bazach danych ktore mają transakcje z zapytaniami zmieniającymi
+			schemat bazy, migracje są traktowane jako transakcje. Jeżeli baza danych nie ma takiej funkcji
+			i część migracji zakonczy się niepowodzeniem, trzeba będzie ręcznie cofnąć wykonane zmiany.
+			Niektóre zapytania nie mogą być wykonane w transakcji, aby wyłączyć transakcje dla jednej
+			migracji można użyć funkcji disable_ddl_transaction!. Dla transakcji których AR nie potrafi
+			zrollobackować można użyć metody reversible albo zdefiniować metody up i down.
+		</p>
+	</li>
+
+	<li>
+		<p>
+			Migracje są przechowywane w plikach w folderze db/migrations. Pliki w nazwach mają timestampy
+			UTC i nazwę migracji. Nazwa klasy migracji powinna odpowiadać nazwie pliku. Np migracja
+			create_products.rb to klasa o nazwie CreateProducts a migracja add_details_to_products -
+			AddDetailsToProducts. Timestampy są używane do określenia kolejności uruchamiania migracji.
+			Dlatego należy zwracać na nie uwagę podczas kopiowania plików migracji z innych projektów.
+			AR posiada generator plików migracji dzięki czemu nie trzeba ręcznie wpisywać timestampów.
+			Np "rails generate migration AddPartNumberToProducts" stworzy pusty plik klasy migracji o
+			odpowiedniej nazwie. Jeżeli nazwa migracji jest w formie AddColumnToTable i jest po niej
+			podana nazw kolumn i typów generator wypełni migracje odpowiednimi danymi. Np "rails
+			generate migration AddPartNumberToProducts part_number:string" wygeneruje w klasie migracji
+			"add_column :products, :part_number, :string". Można też dodać indeks do istniejącej kolumny.
+			"rails generate migration AddPartNumberToProducts part_number:string:index". Aby usunąć
+			"rails generate migration RemovePartNumberFromProducts part_number:string". Można też za
+			jednym razem podać kilka kolumn - "rails generate migration AddDetailsToProducts
+			part_number:string price:decimal". Aby stworzyć tabelę - "rails generate migration
+			CreateProducts name:string part_number:string". Generatory tworzą tylko początkową wersję
+			pliku migracji, który może być w dowolny sposób modyfikowany. Jeżeli typ kolumny to
+			references, wygenerowany zostanie klucz obcy - "rails generate migration AddUserRefToProducts
+			user:references", wygeneruje kolumne user_id w tabeli products. Generator może też stworzyć
+			join tabele jeżeli JoinTable jest częścią nazwy "rails g migration CreateJoinTableCustomerProduct
+			customer product". Powstanie tabela join z kolumnami product_id i customer_id. Generatory
+			mogą też tworzyć migracje dla modeli - "rails generate model Product name:string
+			description:text". Generatorom mogą zostać przekazane modyfikatory typów w nawiasach.
+			"rails generate migration AddDetailsToProducts 'price:decimal{5,2}'
+			supplier:references{polymorphic}" spowoduje wpisanie do migracji kolumny price typu decimal
+			z precyzją 5 i skalą 2 oraz polimorficznej referencji do supplier.
+		</p>
+	</li>
+
+	<li>
+		<p>
+			Najpopularniejsza metoda w migracjach to create_table służąca do tworzenia nowych tabel
+			domyślnie zawierających klucz główny id, który można zmienić pamiętając równocześnie o
+			zmianach w modelu. Jeżeli id jest niepotrzebne można przekazać opcję id:false. Jeśli
+			konieczne jest przekazanie opcji charakterystycznych dla bazy danych można je bezpośrednio
+			przesłać używając funkcji "options:". Można też użyć opcji :comment, która służy do opisu
+			tabeli w bazie danych. Komentarz będzie można odczytać jednym z narzędzi do administracji
+			bazami danych. Komentarze są obecnie dostępne w adapterach MySQL i PostgreSQL. Metoda
+			create_join_table służy do stworzenia tabeli HABTM, np "create_join_table :products,
+			:categories" stworzy tabelę categories_products z dwiema kolumnami category_id i
+			product_id z opcją null ustawioną domyślnie na false. Można to zmienić używając opcji
+			"create_join_table :products, :categories, column_options: { null: true }". Domyślnie
+			nazwa tabeli join powstaje z połączenia pierwszych dwóch argumentów w kolejności
+			alfabetycznej. Aby użyć własnej nazwy - "create_join_table :products, :categories,
+			table_name: :categorization". W ten sposób powstanie tabela o nazwie categorization.
+			Funkcja create_join_table przyjmuje również bloki, które mogą być użyte do dodawania indeksów
+			lub dodatkowych kolumn. Do zmieniania istniejących tabel używa się metody change_table.
+			Można dzięki niej usuwać kolumny "t.remove", dodawać "t.string", dodawać indeks "t.index"
+			albo zmieniać nazwę "t.rename". Podobnie do metod remove_column i add_column istnieje metoda
+			change_column. "change_column :products, :part_number, :text" zmienia typ kolumny part_number
+			na text. Funkcja change_column jest nieodwracalna. Metody change_column_null i
+			change_column_default są używane do zmiany ograniczenia not null i domyśnych wartości kolumn.
+			"change_column_null :products, :name, false" ustawia pole name z tabeli products na not null
+			a "change_column_default :products, :approved, from: true, to: false" domyślną wartość
+			kolumny approved z true na false. Można też użyć skrótu "change_column_default :products,
+			:approved, false" co spowoduje jednak że migracja będzie nieodwracalna. Podczas tworzenia
+			lub zmieniania kolumny można użyć modyfikatorów, np limit(maksymalny rozmiar pola string/text/
+			binary/integer), precision i scale(dla pól decimal), polymorphic, null(pozwala lub nie na puste
+			pola), default(domyślna wartość kolumny), comment(komentarz kolumny). Do kluczów obcych mogą
+			być dodawane ograniczenia. "add_foreign_key :articles, :authors" tworzy klucz obcy author_id w
+			tabeli articles. Klucz odnosi się do pola id w tabeli authors. Jeżeli nazwa kolumny nie może
+			być rozpoznana na podstawie nazw tabel należy użyć opcji :column i :primary_key. Rails wygeneruje
+			nazwę dla każdego klucza obcego, zaczyna się od fk_rails_ a następnie ma 10 znaków wygenerowanych
+			z from_table i column. Jeżeli potrzebna jest inna nazwa można użyć opcji :name. AR używa tylko
+			kluczy obcych korzystających z 1 kolumny. Dla złożonych kluczy konieczne jest użycie execute i
+			structure.sql. Aby usunąć klucz obcy "remove_foreign_key :accounts, :branches", albo
+			"remove_foreign_key :accounts, column: :owner_id", "remove_foreign_key :accounts,
+			 name: :special_fk_name". Jeżeli funkcje Active Record są niewystarczające można użyć metody
+			execute pozwalającej na uruchamianie dowolnych zapytań SQL. Na przykład możliwe jest zapytanie
+			"Product.connection.execute("UPDATE products SET price = 'free' WHERE 1=1"). Więcej informacji
+			można znaleźć w dokumentacji API, dla metod change up down, create_table i change_table.
+			Metoda change jest głównym sposobem tworzenia migracji. Można w niej użyć wielu różnych funkcji,
+			np add_column, add_foreign_key, create_table, remove_column, rename_column, rename_table itd.
+			change_table jest odwracalne o ile blok nie używa metod change, change_default albo remove.
+			remove_column jest odwracalne jeżeli podany będzie typ kolumny jako trzeci argument i
+			oryginalne opcje kolumny "remove_column :posts, :slug, :string, null: false, default: ''".
+			Jeżeli istnieje konieczność użycia innych metod należy wykorzystać funkcje reversible lub
+			zdefiniować metody up i down zamiast change. *3.9*
+
+		</p>
+	</li>
+
+	<li>
+		<p>
+			
+		</p>
+	</li>
+
+	<li>
+		<p>
+			
+		</p>
+	</li>
+
+	<li>
+		<p>
+			
+		</p>
+	</li>
+
+	<li>
+		<p>
+			
+		</p>
+	</li>
+
+	<li>
+		<p>
+			
+		</p>
+	</li>
+
+</ul>
