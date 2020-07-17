@@ -99,38 +99,171 @@
 			remove_column jest odwracalne jeżeli podany będzie typ kolumny jako trzeci argument i
 			oryginalne opcje kolumny "remove_column :posts, :slug, :string, null: false, default: ''".
 			Jeżeli istnieje konieczność użycia innych metod należy wykorzystać funkcje reversible lub
-			zdefiniować metody up i down zamiast change. *3.9*
-
+			zdefiniować metody up i down zamiast change. Złożone migracje mogą wymagać
+			przetwarzania, którego Active Record nie będzie potrafił odwrócić. Wtedy
+			należy wykorzystać funkcję reversible i wskazać co zrobić kiedy migracja
+			jest uruchamiana a co kiedy jest rollbackowana(dir.up i dir.down). Dzięki
+			reversible instrukcje będą wykonana w odpowiedniej kolejności. W podanym
+			przykładzie blok down będzie uruchomiony po tym jak kolumna home_page_url
+			zostanie usunięta i przed usunięciem tabeli distributors. Czasami
+			migracje będą wykonywać coś co jest po prostu nieodwracalne, np usuną
+			jakieś dane. W takich przypadkach można wykorzystać błąd IrreversibleMigration
+			w metodzie down. Jeżeli ktoś spróbuje zrollbackować migrację wyświetli się
+			komunikat mówiący, że to niemożliwe. Zamiast reversible można też użyć
+			metod up i down. Powinny być tak napisane że po uruchomieniu up i down
+			schemat bazy danych pozostaje niezmieniony. Jeżeli tabela jest tworzona w
+			up należy ją usunąć w down. Dobrze jest wykonywać operacje w down w kolejności
+			odwrotnej do tej z up. Dla nieodwracalnych migracji można też wykorzystac
+			błąd IrreversibleMigration w metodzie down. Active Record może być wykorzystany
+			do cofnięcia migracji za pomocą metody revert, np revert ExampleMigration.
+			revert może też przyjąć blok instrukcji do odwrócenia. Można to wykorzystać
+			do cofnięcia jedynie niektórych zmian z poprzednich migracji. Np jeśli
+			migracja ExampleMigration została wykonana ale później zamiast CHECK
+			użytkownik chce użyć walidacji Active Record do sprawdzenia zipcodu można
+			użyć metody revert. Ta samamigracja mogłaby zostać napisana bez użycia
+			reverse jednake wymagałoby to wielu dodatkowych kroków, zmiany kolejności
+			tworzenia tabel zamiany up i down itd. Metoda revert robi to wszystko
+			automatycznie. Aby wykorzystać ograniczenia check, należy użyć funkcji
+			structure.sql.
 		</p>
 	</li>
 
 	<li>
 		<p>
-			
+			Rails posiada wiele poleceń wykorzystywanych do uruchamiania grup migracji.
+			Pierwszą z nich jest "rails db:migrate". W najprostszej formie wywołuje
+			ona metody up i down dla wszystkich migracji, które do tej pory nie zostały
+			wykorzystane. Jeżeli nie ma takich migracji, kończy swoje działanie.
+			Migracje zostaną uruchomione w kolejności swoich timestampów. Polecenie
+			db:migrate uruchamia również db:schema:dump uaktualniające plik schema.rb
+			tak aby odpowiadał strukturze bazy danych. Jeżeli podana zostanie wersja
+			migracji RoR uruchomi wszystkie migracji aż do podanej. Numer wersji
+			to prefix nazwy pliku migracji, np "rails db:migrate VERSION=20080906120000".
+			Jeżeli podana wersja jest wyższa od aktualnej wersji uruchomione zostaną
+			wszystkie migracje do podanej włącznie. W przypadku migracji w dół, metoda
+			down zostanie wywołana na wszystkich migracjach poniżej podanej(z jej wyłączeniem).
+			Częstym zadaniem jest rolbackowanie ostatniej migracji, np jeżeli popełniło się
+			błąd i chce się go naprawić. Aby to zrobić wystarczy wpisać "rails db:rollback".
+			Polecenie spowoduje zrollbackowanie ostatniej migracji poprzez odwrócenie
+			metody change lub uruchomienie metody down. Jeżeli konieczne jest zrollbackowanie
+			kilku migracji można podać parametr STEP. "rails db:rollback STEP=3" spowoduje
+			cofnięcie trzech ostatnich migracji. Polecenie "db:migrate:redo" to skrót
+			do rollbackowania i uruchamiania migracji ponownie. Podobnie tutaj można
+			użyć parametru STEP "rails db:migrate:redo STEP=3". Te polecenia nie robią
+			niczego czego nie dałoby się zrobić używając db:migrate, są jedynie skrótami,
+			dzięki którym nie jest konieczne ręczne wpisywanie numerów wersji migracji.
+			Polecenie "rails db:setup" stworzy bazę danych, załaduje jej schemat i
+			zainicjalizuje ją danymi. "rails db:reset" usuwa bazę danych i stwarza ją
+			na nowo. Jest to równoważne wpisaniu "rails db:drop db:setup". Nie jest to
+			jednak to samo co uruchamianie wszystkich migracji. Wykorzystany zostanie
+			jedynie plik schema.rb albo structure.sql. Jeżeli migracja nie może być
+			zrollbackowana rails db:reset może nie być przydatne. Jeśli konieczne jest
+			uruchomienie konkretnej migracji, służą do tego metody "db:migrate:up" i
+			"db:migrate:down", np "rails db:migrate:up VERSION=20080906120000". Jeśli
+			podana migracja została już uruchomiona, funkcja zakończy działanie.
+			Domyślnie "rails db:migrate" działa w środowisku development. Aby uruchamiać
+			migracje w innych środowiskach można je podać w zmiennej RAILS_ENV, np
+			"rails db:migrate RAILS_ENV=test" uruchomi migrację w środowisku testowym.
+			Informacje o przebiegu migracji wyświetlane są w terminalu. Można je kontrolować
+			używając różnych opcji. supress_messages przyjmuje jako argument blok
+			i wycisza output wygenerowany przez ten blok. Opcja say przyjmuje wiadomość
+			jako argument i wyświetla ją w całości. Można też przekazać drugi argument
+			typu bool określający obecność wcięć. say_with_time wyświetla tekst razem
+			z informacją jak długo trwało wykonywanie bloku. Jeżeli blok zwraca liczbę
+			całkowitą, zakłada się że jest to liczba zmodyfikowanych wierszy. Aby
+			wyłączyć wyświetlanie informacji można użyć "rails db:migrate VERBOSE=false".
 		</p>
 	</li>
 
 	<li>
 		<p>
-			
+			Czasami możliwe jest popełnienie błędu w czasie tworzenia migracji. Jeżeli
+			migracja została już uruchomiona nie wystarczy jej edycja i ponowne uruchomienie.
+			Trzeba ją najpierw zrollbackować, np poleceniem "rails db:rollback", wprowadzić
+			zmiany i dopiero wtedy uruchomić jeszcze raz poprawioną wersję. Zwykle edycja
+			istniejących migracji nie jest dobrym pomysłem. Lepiej jest stworzyć nową
+			migrację, która wprowadzi wymagane zmiany. Edycja nowej migracji, która nie
+			została jeszcze wprowadzona do systemu kontroli wersji jest dużo łatwiejsza.
+			Metoda revert może być pomocna w czasie pisania nowych plików odwracających
+			zmiany z poprzednich migracji.
 		</p>
 	</li>
 
 	<li>
 		<p>
-			
+			Chociaż migracje są potężnym narzędziem , to najważniejszym elementem
+			odpowiadającym strukturze bazy danych jest plik schema.rb. Dużo łatwiej
+			i szybciej jest stworzyć bazę danych przez załadowanie tego pliku
+			"db:schema:load" niż uruchamiając całą historię migracji. Stare migracje
+			mogą nie działać prawidłowo jeżeli korzystają z zewnętrznych zależności
+			lub polegają na innych niezależnych częściach programu. Pliki schema są
+			przydatne również wtedy, gdy trzeba szybko sprawdzić jakie atrybuty posiada
+			obiekt Active Record. Tej informacji nie ma w modelu i często jest rozproszona
+			w wielu plikach migracji. Format schemadumpów kontrolowany jest przez
+			ustawienie config.active_record.schema_format w pliku config/application.rb.
+			Domyślnie tym formatem jest :ruby ale może też być :sql. Jeżeli wybrany jest
+			:ruby, schema jest przechowywana w schema.rb. Ten plik przypomina trochę
+			dużą migrację. Jest tworzony przez sprawdzanie struktury  bazy danych i
+			wyrażenie jej za pomocą funkcji takich jak create_table, add_index itd.
+			Plik schema.rb nie może reprezentować wszystkiego co znajduje się w bazie
+			danych, np triggerów, sekwencji, procedur, ograniczeń check. W migracjach
+			można używać execute do wykorzystywania dodatkowych funkcji. Funkcje te mogą
+			być niedostępne w schema dumperze. Jeżeli wykorzystuje się je, lepiej jest
+			ustawić schema format na sql aby mógł on być reprezentowany w odpowiedni sposób.
+			W tym przypadku struktura bazy danych jest przechowywana w pliku structure.sql.
+			Np w PostgreSQL używane jest narzędzie pg_dump. Dla MySQL i MariaDB, plik
+			będzie zawierał output poleceń SHOW CREATE TABLE dla różnych tabel. Aby załadować
+			schemat z db/structure.sql, należy użyć polecenia "rails db:structure:load".
+			Plik zostanie załadowany przez uruchamianie zawartych w nim zapytań SQL.
+			Spowoduje to powstanie doskonałej kopii struktury bazy danych. Plik schema
+			powinien być umieszczony w systemie kontroli wersji. Jeżeli dwie gałęzie
+			modyfikują schemat, możliwe są konflikty. Aby je rozwiązać trzeba uruchomić
+			"rails db:migrate" co spowoduje stworzenie poprawnego pliku schematu.
 		</p>
 	</li>
 
 	<li>
 		<p>
-			
+			Active Record zakłada że logika należy do modeli a nie do bazy danych.
+			Dlatego funkcje takie jak triggery czy ograniczenia nie są zbyt często
+			stosowane. Walidacje takie jak "validates :foreign_key, uniqueness: true"
+			są jedną z metod, dzięki którym modele mogą wymusić poprawność danych.
+			Opcja :dependent w powiązaniach pozwala modelom na automatyczne usuwanie
+			zależnych obiektów kiedy obiektó główny jest usuwany. Jak wszędzie tam
+			gdzie działania przeprowadzane są na poziomie aplikacji, nie ma gwarancji
+			integralności, dlatego niektórzy wykorzystują również ograniczenia kluczy
+			obcych w bazie danych. Pomimo że Active Record nie zapewnia wszystkich
+			narzędzi do bezpośrednich działań z takimi funkcjami, można w tym przypadku
+			wykorzystać metodę execute wykonującą dowolne zapytania SQL.
 		</p>
 	</li>
 
 	<li>
 		<p>
-			
+			Głównym celem migracji jest stosowanie spójnego systemu poleceń zmieniających
+			schemat bazy danych. Migracje mogą być też używane do dodawania lub modyfikowania
+			danych. Jest to przydatne w przypadku baz, których nie można usunąć i odtworzyć,
+			np baz produkcyjnych. Aby dodać dane po utworzeniu bazy, Rails wykorzystuje
+			metodę seed. Przydaje się to podczas częstego testowania bazy w środowisku
+			test lub development. Aby skorzystać z tej funkcji wystarczy wypełnić plik
+			seeds.rb i wpisać polecenie "rails db:seed". Dzięki temu nie trzeba wpisywać
+			testowych danych ręcznie.
+		</p>
+	</li>
+
+	<li>
+		<p>
+			Pliki schema.rb i structure.sql to snapszoty obecnego stanu bazy danych i
+			są postawowym źródłem informacji podczas jej budowania. Dzięki temu możliwe
+			jest usuwanie starych plików migracji. Kiedy pliki migracji są usuwane, każde
+			środowisko, w którym "rails db:migrate" było uruchomione kiedy jeszcze istniały,
+			będzie przechowywało referencje do ich timestampa w wewnętrznej bazie Railsów,
+			w tabeli o nazwie schema_migrations. Ta tabela jest używana do śledzenia czy
+			migracje zostały uruchomione w określonym środowisku. Jeżeli uruchomione
+			zostanie polecenie "rails db:migrate:status" wyświetlające statusy wszystkich
+			migracji, obok usuniętych migracji pojawi się informacja ********** NO FILE **********
+			informująca że były one wykonane w poszczególnych środowiskach ale nie ma
+			ich już w folderze "db/migrate/".
 		</p>
 	</li>
 
