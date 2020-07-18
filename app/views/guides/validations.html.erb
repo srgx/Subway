@@ -1,3 +1,98 @@
 <h2>Active Record Validations</h2>
 
-<li></li>
+<ul>
+
+  <li>
+    <p>
+      Jak widać walidacja "validates :name, presence: true" sprawdza czy
+      obiekt Person ma atrybut name. Jeżeli obiekt jest niepoprawny, nie zostanie
+      zapisany w bazie danych. Walidacje stosuje się aby mieć pewność, że jedynie
+      prawidłowe dane będą zapisane w bazie. Chodzi np o sprawdzenie poprawności
+      adresu email każdego użytkownika. Walidacja na poziomie modelu są niezależne
+      od bazy danych, nie mogą być zhackowane przez endusera i są łatwe w testowaniu
+      i użyciu. Dzięki wbudowanym helperom ich używanie i tworzenie w RoR jest
+      bardzo łatwe. Istnieje kilka metod walidacji danych przed zapisaniem w bazie.
+      Są to ograniczenia w samej bazie, walidacje po stroniew klienta i walidacje
+      w kontrolerze. Ograniczenia w bazie danych są zależne od konkretnej bazy
+      i mogą spowodować że ich testowanie i używanie będą trudne. Jeżeli jednak
+      baza używana jest przez wiele różnych aplikacji ich zastosowanie może mieć
+      sens. Poza tym ograniczenia w bazie danych mogą obsłużyć przypadki, które
+      bardzo trudno zrealizować w inny sposób. Walidacje po stronie klienta
+      mogą być przydatne ale nie zapewniają bezpieczeństwa jeżeli stosuję się je
+      bez innych rodzajów walidacji. Jeśli używają javascripta, wystarczy wyłączyć
+      go w przeglądarce i można w łatwy sposób obejść zabezpieczenia. W połączeniu
+      z innymi technikami ich stosowanie jest jednak ok i użytkownik ma od razu
+      informację zwrotną. Walidacja w kontrolerach zwykle z czasem staje się trudna
+      do przetestowania i rozwijania. Najlepiej jest mieć kontrolery z niewielką
+      ilośćią logiki, dzięki czemu praca z nimi będzie łatwa i przyjemna. W większości
+      przypadków zaleca się jednak używanie walidacji w modelach. Są 2 rodzaje
+      obiektów AR - te które odpowiadają wierszom w bazie i te które nie odpowiadają.
+      Kiedy tworzy się obiekt używając new, nie jest on jeszcze zapisany w bazie.
+      Stanie się to dopiero po wywołaniu metody save. AR używa metody new_record?
+      do sprawdzenia czy obiekt jest już zapisany w bazie. Jeżeli nie jest, funkcja
+      zwraca true, w przeciwnym razie false. Tworzenie obiektów to zapytanie INSERT,
+      updatowanie UPDATE. Walidacje są uruchamiane zanim te zapytania zostaną wykonane
+      na bazie danych. Jeżeli walidacje się nie powiodą obiekt zostanie oznaczony jako
+      nieprawidłowy. Można ustawić włączanie konkretnych walidacji w czasie tworzenia,
+      updatowania lub zapisywania obiektów. Jest wiele metod, którymi można zmienić
+      stan obiektu w bazie danych. Niektóre metody będą triggerować walidacje, inne
+      nie. To oznacza, że przy braku ostrożności możliwe jest zapisanie obiektu w
+      bazie w nieprawidłowym stanie. Metody triggerujące walidacje to create,
+      save i update oraz ich wersje z wykrzyknikiem. Wykrzyknikowe wersje zwracają
+      błąd zamiast true albo false. Create zwraca obiekt. Wiele metod omija walidację,
+      np decrement, increment, touch, update_all itd. Również metoda save może
+      ominąć walidację jeśli przekazany zostanie parametr validate: false.
+      Przed zapisaniem obiektu AR automatycznie uruchamia walidacje. Można je
+      również włączyć ręcznie metodą "valid?". Po walidacji wszystkie błędy można
+      znaleźć dzięki metodzie errors.messages. Obiekt jest prawidłowy, jeżeli
+      po walidacji lista błędów jest pusta. Obiekt stworzony przez new nie posiada
+      żadnych błędów nawet jeśli jest niepoprawny. Walidacja striggeruje się
+      dopiero po skorzystaniu z metod create lub save. Metodą odwrotną do "valid?"
+      jest "invalid?". Żeby sprawdzić czy jakiś atrybut obiektu jest poprawny,
+      można użyć errors[:attribute]. Metoda zwróci listę wszystkich błędów dla
+      :attribute. Jeżeli nie ma błędów, lista będzie pusta. Podobnie jak wcześniej,
+      metoda działa jedynie po tym jak walidacja została uruchomiona. Aby sprawdzić,
+      które walidacje nie powiodły się można użyć metody errors.details[:attribute].
+      Zwróci ona tablicę haszów z kluczem :error, który pozwoli dostać się do
+      symbolu walidatora.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      *2 Validation Helpers*
+      ...
+    </p>
+  </li>
+
+  <li>
+    <p>
+    </p>
+  </li>
+
+  <li>
+    <p>
+    </p>
+  </li>
+
+  <li>
+    <p>
+    </p>
+  </li>
+
+  <li>
+    <p>
+    </p>
+  </li>
+
+  <li>
+    <p>
+    </p>
+  </li>
+
+  <li>
+    <p>
+    </p>
+  </li>
+
+</ul>
