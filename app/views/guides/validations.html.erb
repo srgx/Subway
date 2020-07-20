@@ -60,23 +60,92 @@
 
   <li>
     <p>
-      *2 Validation Helpers*
+      Active Record oferuje wiele predefiniowanych walidacyjnych helperów.
+      Za każdym razem kiedy walidacja failuje błąd jest dodawany do listy
+      error obiektu i ten błąd jest powiązany z nazwą atrybutu. Każdy helper
+      może przyjąć dowolną ilość atrybutów. Wszystkie z nich mają opcje :on i
+      :message, które wskazują kiedy walidacja powinna mieć miejsce i jaką wiadomość
+      należy dodać do listy error w przypadku faila. Opcje dostępne dla :on to
+      :create lub :update. Dla każdego validation helpera istnieją domyślne
+      wiadomości błędów. Są one używane jeśli opcja :message nie została wypełniona.
+      Metoda acceptance sprawdza czy checkbox został zaznaczony, np zgoda na warunki
+      usługi "validates :terms_of_service, acceptance: true". Można też wpisać
+      "validates :terms_of_service, acceptance: { message: 'must be abided' }".
+      Można też wybrać listę akceptowanych wartości. validates_associated sprawdza
+      poprawność powiązanych modeli. Nie należy używać tej funkcji po obu stronach relacji.
+      Spowodowałoby to niekończącą się pętlę. Metoda confirmation jest stosowana
+      kiedy 2 pola muszą zawierać ten sam tekst, np powtórzone hasło lub email.
+      Pola powinny nazywać się np :email i :email_confirmation. Test przeprowadzany
+      jest jedynie jeśli pola nie są puste dlatego konieczne może być sprawdzenie
+      pierwszego pola z użyciem helpera presence. Domyślnie sprawdzanie jest
+      case sensitive ale można to zmienić. exclusion sprawdza czy atrybut nie
+      należy do określonego zbioru(obiektu enumerable), np in: %w(www us ca jp).
+      Można użyć też słowa within. Helper format sprawdza czy wartość atrybutu
+      pasuje(with) lub nie pasuje(without) do wyrażenia regularnego. Helper
+      inclusion sprawdza czy atrybut należy do określonego zbioru. length to
+      sprawdzenie długości wartości atrybutu. Można ustawić wartości maximum,
+      minimum, przedział wartości itd. Są różne rodzaje wiadomości dla błędów,
+      np too_long. numericality akceptuje jedynie wartości numeryczne. Aby ustawić
+      jedynie integery istnieje opcja :only_integer. Istnieją również inne opcje,
+      np :greater_than, :equal_to, :even, :odd, itd. Domyślnie wartości numeryczne
+      nie mogą być nilem. Można to zmienić używając allow_nil: true. presence
+      sprawdza czy wartosc atrybutu jest wypełniona(nie jest blank). Sprawdzane
+      są też powiązane obiekty, np "belongs_to :order, validates :order, presence: true"
+      albo w klasie Order "has_many :line_items, inverse_of: :order". Jeżeli sprawdzana
+      jest obecność istnienia boolean należy uważać ponieważ false.blank? jest true.
+      Dlatego trzeba użyć np "inclusion: { in: [true, false] }" albo "exclusion: { in: [nil] }".
+      Helper absence sprawdza czy atrybuty są puste. Działa to również z relacjami.
+      W klasie LineItem "belongs_to :order, validates :order, absence: true".
+      W klasie Order "has_many :line_items, inverse_of: :order". Przy testowaniu
+      atrybutu boolean "exclusion: { in: [true, false] }". uniqueness sprawdza czy
+      atrybut jest unikalny przed zapisaniem w bazie. Nie powoduje to utworzenia
+      ograniczeń w bazie. Dlatego możliwe że 2 połączenia z bazą stworzą 2 takie
+      same obiekty. Aby tego uniknąć konieczne jest stworzenie indeksu w konkretnej
+      kolumnie w bazie danych. Opcja :scope pozwala na ograniczenie sprawdzenia
+      unikalności, np "scope: :year". Uzywając scope trzeba użyć indeksu na obu
+      kolumnach w bazie. Domyślnie sprawdzanie jest case_sensitive ale można to
+      zmienić. Niektóre bazy danych są skonfigurowane do wyszukiwania case-insensitive.
+      validates_with przekazuje rekord innej klasie do walidacji, można np użyć
+      w klasie Person "validates_with GoodnessValidator". Klasa sprawdzająca ma
+      metodę "validate(record)" i ręcznie umieszcza błędy w liście error.
+      Helperowi validates_with można przekazać opcje :if, :unless i :on. Jeżeli
+      przekazane zostaną jakiekolwiek inne opcję, będą one dostępne w metodzie klasy
+      jako options. Walidator będzie zainicjowany tylko raz w ciagu działania całej
+      aplikacji. Jeżeli walidator jest bardzo skomplikowany można używać jego obiektów,
+      np "GoodnessValidator.new(person).validate". Helper validates_each sprawdza
+      atrybuty na podstawie bloku. Nie posiada żadnych funkcji walidacyjnych ani
+      dodających błędy dlatego trzeba je napisać samodzielnie.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Opcja :allow_nil pozwala na ominięcie walidacji dla wartości nil, :allow_blank
+      dla wartości blank. Dzięki opcji :message można ustawić włąsne wiadomości błędów.
+      Przekazywane wartości to String albo Proc. String może zawierać %{value}
+      %{attribute} i %{model}. Proc przyjmuje dwa argumenty, walidowany obiekt i
+      hasz z :model :attribute i :value. Opcja :on wskazuje kiedy odbywa się walidacja.
+      Domyślnie dzieje się to podczas uruchamiania metody save. Inne opcje to np
+      "on: :create" albo "on: :update". On może być też użyte do definiowania
+      własnych kontekstów. Trzeba je jednak później jawnie przekazać metodom
+      valid? invalid? lub save. Sprawdzane są wtedy walidacje z kontekstami i bez
+      kontekstów.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Można sprawić, że walidacje w razie niepowodzenia będą generować błąd.
+      Wystarczy skorzystać z opcji "{ strict: true }", której da się przekazać
+      również własne wyjątki, np "validates :token, presence: true, uniqueness: true,
+      strict: TokenGenerationException".
+    </p>
+  </li>
+
+  <li>
+    <p>
+      *5 Conditional Validation*
       ...
-    </p>
-  </li>
-
-  <li>
-    <p>
-    </p>
-  </li>
-
-  <li>
-    <p>
-    </p>
-  </li>
-
-  <li>
-    <p>
     </p>
   </li>
 
