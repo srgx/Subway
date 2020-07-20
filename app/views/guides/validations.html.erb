@@ -144,23 +144,84 @@
 
   <li>
     <p>
-      *5 Conditional Validation*
-      ...
+      Czasami dobrze jest walidować obiekt jedynie jeżeli spełnione są określone
+      warunki. Można to osiągnąć używając opcji :if i :unless przyjmujących jako
+      parametr symbol, Proc lub Array. :if stosuje się jeśli walidacja ma mieć miejsce
+      a :unless w przeciwnym przypadku. Najczęściej używa się  metod :if i :unless
+      w połączeniu z symbolem określającym nazwę metody, np "if: :paid_with_card?"
+      dla metody paid_with_card?. Dzięki przekazywaniu Proc można uniknąć tworzenia
+      oddzielnej metody i wpisać całą logikę w funkcji anonimowej. Na przykład
+      "unless: Proc.new { |a| a.password.blank? }". Alternatywny zapis funkcji:
+      "unless: -> { password.blank? }". Aby pogrupować warunkowe walidacje
+      stosuje się metodę with_options, np "with_options if: :is_admin? do |admin|...".
+      Jeżeli wiele warunków decyduje o tym czy walidacja powinna się odbyć, można
+      zastosować tablicę, np "if: [Proc.new { |c| c.market.retail? }, :desktop?]".
+      Z tablicą można też używać :unless.
     </p>
   </li>
 
   <li>
     <p>
+      Czasami wbudowane walidatory są niewystarczające. W tym przypadku można
+      stworzyć własne walidatory lub metody walidujące. Custom validators to
+      klasy dziedziczące po ActiveModel::Validator. Muszą one posiadać metodę
+      validate przyjmującą jako argument record i walidującą go. Walidator
+      uruchamiany jest metodą validates_with. Najłatwiejszym sposobem na
+      dodanie własnego walidatora sprawdzającego poszczególne atrybuty jest
+      użycie klasy ActiveModel::EachValidator. W tym przypadku walidator musi
+      posiadać metodę validates_each przyjmującą trzy argumenty: rekord, atrybut
+      i wartość "validates :email, presence: true, email: true". Można też
+      stworzyć metody, które weryfikują stan modeli i dodają wiadomości do listy
+      errors. Te metody muszą być zarejestrowane poprzez użycie metody validate
+      z symbolami reprezentującymi nazwy metod. Można przekazać więcej niż
+      jeden symbol a metody będą uruchomione w kolejności rejestracji. Metoda
+      valid? sprawdzi czy lista error jest pusta dlatego konieczne jest ręczne
+      dodawanie odpowwiednich błędów. Domyślnie te walidacje będą włączane
+      zawsze kiedy zostanie wywołana metoda valid? lub nastąpi próba zapisania
+      obiektu. Możliwe jest również kontrolowanie czasu walidacji dzięki opcji
+      :on metody validate z parametrami :create albo :update.
     </p>
   </li>
 
   <li>
     <p>
+      Poza metodami valid? i invalid? RoR posiada również inne metody używane
+      do interakcji z listą errors. Metoda errors zwraca obiekt klasy
+      ActiveModel::Errors zawierający wszystkie błędy. Każdy klucz to nazwa
+      atrybutu a wartość to tablica stringów z błędami. Metoda errors[] jest
+      wykorzystywana do sprawdzenia błędów dla konkretnych atrybutów, np
+      "person.errors[:name]". Jeżeli nie ma błędów, zwraca pustą tablicę.
+      Za pomocą errors.add możliwe jest dodawanie wiadomości błędów dla atrybutów.
+      Jako parametr przyjmuje atrybut i wiadomość błędu. Metoda errors.full_messages
+      zwraca błedy w łatwej do odczytania formie z nazwą atrybutu dołączoną do
+      każdego błędu. Można wybrać typ walidatora jako hash używając metody
+      errors.add, np "errors.add(:name, :invalid_characters)", spowoduje
+      "person.errors.details[:name] - [{error: :invalid_characters}]". Aby
+      wyświetlać bardziej szczegółowe wiadomości błędów można przekazać funkcji
+      errors.add dodatkowe klucze - "errors.add(:name, :invalid_characters,
+      not_allowed: "!@#%*()_-+="). Spowoduje to zwrócenie dla "person.errors.details[:name]"
+      "[{error: :invalid_characters, not_allowed: "!@#%*()_-+="}]". Wszystkie
+      wbudowane walidatory RoR wypełniają hasz odpowiednim typem walidatora.
+      Dzięki errors[:base] można dodawać błędy dotyczące całego obiektu,
+      niepowiązane z tylko jednym atrybutem. Wystarczy dodać wiadomość błędu
+      w postaci stringa - "errors[:base] << "This person is invalid because ..."".
+      Metoda errors.clear pozwala na usunięcie wszystkich błędów z kolekcji errors.
+      Funkcja errors.size zwraca liczbę wszystkich wiadomości błędów obiektu.
     </p>
   </li>
 
   <li>
     <p>
+      Kiedy już stworzono model i dodano walidację dobrze jest pokazać użytkownikowi
+      błędy w przypadku niepowodzenia. Ponieważ każda aplikacja rozwiązuję tę
+      kwestię inaczej RoR nie posiada view helperów, które generowałyby te wiadomości
+      bezpośrednio. Dzięki dużej ilości metod związanych z walidacją łatwo jest
+      jednak wyświetlać te wiadomości samodzielnie. Dodatkowo, kiedy generowana
+      jest część projektu, RoR umieszcza w pliku _form.html.erb fragmenty wyświetlające
+      pełną listę błędów modelu, np "if @article.errors.any?...". Dodatkowo, jeżeli
+      zostaną użyte form helpery i będzie miał miejsce błąd walidacji, wokół
+      pola atrybutu zostanie wygenerowany dodatkowy div field_with_errors.
+      Za pomocą CSS można dostosować jego wygląd do własnych potrzeb.
     </p>
   </li>
 

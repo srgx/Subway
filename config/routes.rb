@@ -3,12 +3,19 @@ Rails.application.routes.draw do
 
   root 'guides#index'
 
+  # Models
   get 'guides/basics'
   get 'guides/migrations'
   get 'guides/validations'
   get 'guides/callbacks'
   get 'guides/associations'
   get 'guides/interface'
+  get 'guides/abasics'
+
+  # Views
+  get 'guides/viewover'
+  get 'guides/layrender'
+  get 'guides/viewform'
 
   resources :books do
     resources :comments, only: [ :create ]
