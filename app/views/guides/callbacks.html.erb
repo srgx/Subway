@@ -24,8 +24,7 @@
       życia obiektu, np "before_validation :normalize_name, on: :create" albo
       "after_validation :set_location, on: [ :create, :update ]". Dobrze jest
       deklarować metody callbacków jako prywatne. Gdyby były publiczne, dałoby
-      się je wywołać spoza modelu, co kłóciłoby się z filozofią enkapsulacji.
-
+      się je wywołać spoza modelu, co kłóciłoby się z zasadami enkapsulacji.
     </p>
   </li>
 
@@ -125,8 +124,53 @@
 
   <li>
     <p>
-      *Callback Classes*
-      ...
+      Czasami metody callbacków będą przydatne w wielu różnych modelach. Active
+      Record pozwala na tworzenie klas enkapsulujących metody callbacków, dzięki
+      czemu bardzo łatwe jest ponowne ich wykorzystanie. Oto przykład, w którym
+      tworzymy klasę z callbackiem after_destroy dla modelu PictureFile. Kiedy
+      callback jest definiowany wewnątrz klasy, jego metody otrzymają obiekt
+      modelu jako parametr. Callback może być następnie użyty w klasie modelu,
+      np "after_destroy PictureFileCallbacks.new". Konieczne jest stworzenie
+      nowego obiektu PictureFileCallbacks ponieważ callback jest metodą jego
+      instancji. Jest to szczególnie przydante jeśli callbacki korzystają ze
+      stanu obiektu. Często jednak lepiej jest zadeklarować je jako metody klas.
+      Jeżeli callback jest zadeklarowany w ten sposób, nie ma konieczności
+      tworzenia nowego obiektu - "after_destroy PictureFileCallbacks".
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Istnieją dwa dodatkowe callbacki triggerujące się po wykonaniu transakcji
+      w bazie danych: after_commit i after_rollback. Te callbacki są bardzo podobne
+      do callbacku after_save z tym że nie uruchamiają się dopóki zmiany w bazie
+      nie zostaną zatwierdzone lub zrollbackowane. Najbardziej przydają się jeśli
+      modele Active Record muszą wchodzić w interakcje z zewnętrznymi systemami,
+      które na są częścią transakcji bazy danych. W poprzednik przykładzie, model
+      PictureFile usuwał plik po tym jak odpowiadający mu rekord był usunięty.
+      Jeżeli cokolwiek spowodowałoby wyjątek po callbacku after_destroy i transakcja
+      zostałaby zrollbackowana, plik zostałby usunięty i model byłby w nieodpowiednim
+      stanie. Na przykład plik picture_file_2 jest niepoprawny i metoda save!
+      powoduje wygenerowanie błędu. Używając metody after_commit można obsłużyć
+      ten przypadek - "after_commit :delete_picture_file_from_disk, on: :destroy".
+      Opcja :on decyduje kiedy callback zostanie uruchomiony. Bez niej callback
+      będzie się uruchamiał dla każdej akcji. Callback after_commit jest zwykle
+      używany z metodami create update albo delete, dlatego istnieje kilka aliasów
+      dla tych operacji - after_create_commit, after_update_commit, after_destroy_commit.
+      Można np wpisać "after_destroy_commit :delete_picture_file_from_disk".
+      Kiedy transakcja się kończy, callbacki after_commit lub after_rollback
+      są wywoływane dla wszystkich tworzonych, updatowanych lub usuwanych modeli.
+      Jeśli jednak jeden z tych callbackow wygeneruje błąd, wyjątek zostanie
+      przekazany dalej i metody after_commit i after_rollback nie będą wywołane.
+      Dlatego jeśli metoda callbacku może wygenerować błąd, konieczne będzie
+      jego obsłużenie wewnątrz callbacku. W przeciwnym razie inne callbacki nie
+      będą mogły zostać wywołane. Program wykonany w callbackach after_commit i
+      after_callback nie jest zamknięty w transakcji. Używanie after_create_commit
+      i after_update_commit w tym samym modelu pozwoli na wywołanie jedynie
+      ostatniemu zdefiniowanemu callbackowi na wywołanie i nadpisze wszystkie
+      pozostałe. Istnieje alias dla callbacka after_commit dla akcji create i
+      update jednocześnie - after_save_commit. Można na przykład użyć go w ten
+      sposób - "after_save_commit :log_user_saved_to_db".
     </p>
   </li>
 
