@@ -1,3 +1,133 @@
 <h2>Active Record Callbacks</h2>
 
-<li></li>
+<ul>
+
+  <li>
+    <p>
+      Podczas normalnych operacji w RoR obiekty mogą być tworzone, updatowane,
+      i usuwane. Active Record posiada hooki, które można połączyć z cyklem
+      życia obiektu, np triggerując funkcje przed lub po zmianie stanu obiektu.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Callbacki to metody, które są wywoływane w konkretnych momentach życia
+      obiektu. Z callbackami możliwe jest napisanie funkcji uruchamianych, kiedy
+      obiekt jest tworzony, zapisywany, updatowany, usuwany, walidowany lub
+      odczytywany z bazy danych. Aby użyć callbacków należy je najpierw zarejestrować.
+      Można stworzyć callbacki jako zwykłe metody a następnie użyć metody klasy
+      w stylu makro aby je zarejestrować, np dla metody :ensure_login_has_a_value,
+      "before_validation :ensure_login_has_a_value". Makrowe metody mogą też
+      przyjmować jako argument blok, np "before_create do...". Callbacki mogą
+      też być skonfigurowane tak aby uruchamiać się jedynie w pewnych momentach
+      życia obiektu, np "before_validation :normalize_name, on: :create" albo
+      "after_validation :set_location, on: [ :create, :update ]". Dobrze jest
+      deklarować metody callbacków jako prywatne. Gdyby były publiczne, dałoby
+      się je wywołać spoza modelu, co kłóciłoby się z filozofią enkapsulacji.
+
+    </p>
+  </li>
+
+
+  <li>
+    <p>
+      To lista z wszystkimi dostępnymi callbackami Active Record. Są pokazane w
+      kolejności, w której zostaną wywołane podczas odpowiadających im operacji
+      tworzenia updatowania i usuwania obiektów. Należy pamiętać że callback
+      after_save jest wywoływany podczas tworzenia i zapisywania obiektów ale
+      zawsze po bardziej szczegółowych callbackach after_create i after_update.
+      Należy unikać updatowania atrybutów w callbackach. Na przykład unikaj
+      uruchamiania "update(attribute: "value")". Może to spowodować zmianę stanu
+      modelu i skutkować nieprzewidzianymi skutkami ubocznymi. Zamiast tego
+      lepiej jest przypisać wartości w callbackach before_create lub wcześniejszych.
+      Callbacki before_destroy powinny być umieszczone przed "dependent: :destroy".
+      Chodzi o to aby mieć pewność że zostaną one wywołane zanim usunie je
+      "dependent: :destroy". Callback after_initialize zostanie wywołany zawsze
+      wtedy, gdy powstanie obiekt Active Record. Może to odbyć się bezpośrednio
+      przez new lub podczas wczytywania danych z bazy. after_initialize pozwala
+      na uniknięcie nadpisywania metody initialize klasy Active Record. Callback
+      after_find uruchamiany jest zawsze podczas wczytywania obiektu z bazy.
+      Jeśli after_initialize i after_find są zdefiniowane, after_find uruchamia
+      się pierwszy. Te callbacki nie mają odpowiedników z prefixem before_* ale
+      możne je zarejestrować tak jak inne callbacki, np "after_find do |user|...".
+      Callback after_touch uruchamia się zawsze kiedy obiekt jest touched. Może
+      być używany razem z belongs_to, np w Employee "belongs_to :company, touch: true"
+      i "after_touch do...". W klasie Company "has_many :employees" i callback
+      "after_touch :log_when_employees_or_company_touched".
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Metody triggerujące callbacki to między innymi create, create!, destroy,
+      destroy!, destroy_all, save, save! itp. Dodatkowo after_find jest triggerowany
+      przez metody all, first find, find_by, last itp. Callback after_initialize
+      jest triggerowany zawsze kiedy powstaje nowy obiekt klasy. Metody find_by_*
+      i find_by_* to dynamiczne metody wygenerowane automatycznie dla każdego
+      atrybutu.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Podobnie jak w przypadku walidacji, możliwe jest omijanie callbacków. Metody
+      omijające to między innymi decrement!, decrement_counter, delete, delete_all,
+      increment!, increment_counter, update_all, itp. Należy zachować ostrożność
+      podczas ich używania ponieważ w callbackach mogą istnieć ważne zasady i logika
+      aplikacji. Omijanie ich bez zrozumienia jak działają, może doprowadzić
+      do błędów.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Zarejestrowane callbacki są umieszczane w kolejce do uruchamiania. Ta
+      kolejka zawiera wszystkie walidacje modelu, callbacki i operacje na bazie
+      danych. Cały łańcuch callbacków jest zawarty w transakcji. Jeżeli którykolwiek
+      callback spowoduje błąd, łańcuch wywołań zostanie zatrzymany i będzie miał
+      miejsce ROLLBACK. Aby zatrzymać łańcuch ręcznie należy użyć "throw :abort".
+      Wszystkie wyjątki pokza ActiveRecord::Rollback lub ActiveRecord::RecordInvalid
+      będą ponownie uruchomione po tym jak łańcuch callbacków zostanie przerwany.
+      Stosowanie wyjątków innych niż te może spowodować błędy w metodach, które
+      nie oczekują, że metody takie jak save albo update wygenerują wyjątki.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Callbacki działają w połączeniu z relacjami i mogą być nawet definiowane
+      dzięki nim. Na przykład jeśli użytkownik ma wiele artykułów, artykuły powinny
+      być usunięte razem z użytkownikiem. W tym przypadku można użyć callbacka
+      after_destroy, np "after_destroy :log_destroy_action".
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Podobnie jak w przypadku walidacji można sprawić, że callbacki uruchomią
+      się jedynie pod pewnymi warunkami. Służą do tego metody :if i :unless,
+      którym można przekazać symbol, Proc lub Array. Metody :if i :unless można
+      połączyć z symbolami odpowiadającymi nazwie metody testującej warunek.
+      Na przykład "before_save :normalize_card_number, if: :paid_with_card?".
+      Zamiast symbolu można użyć obiektu Proc. Najlepiej sprawdza się to z krótkimi
+      metodami - "if: Proc.new { |order| order.paid_with_card? }". Można też
+      napisać "before_save :normalize_card_number, if: Proc.new { paid_with_card? }"
+      ponieważ proc jest wykonywany w kontekście obiektu. W tej samej deklaracji
+      callbacku można użyć razem :if i :unless. Jeżeli istnieje wiele warunków
+      wywołania callbacku, można wykorzystać tablicę zawierającę symbole lub Proce.
+      Na przykład "after_create :send_email_to_author, if: [Proc.new { |c|
+      c.user.allow_send_email? }, :author_wants_emails?], unless: Proc.new
+      { |c| c.article.ignore_comments? }".
+    </p>
+  </li>
+
+
+  <li>
+    <p>
+      *Callback Classes*
+      ...
+    </p>
+  </li>
+
+</ul>
