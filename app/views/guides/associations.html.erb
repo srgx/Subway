@@ -1,3 +1,139 @@
 <h2>Active Record Associations</h2>
 
-<li></li>
+<ul>
+
+  <li>
+    <p>
+      Association w RoR to połączenie między dwoma modelami Active Record. Dlaczego
+      potrzebujemy asocjacji między modelami? Ponieważ sprawiają że wiele popularnych
+      operacji jest dzięki nim łatwiejszych. Na przykład rozważmy prostą aplikację
+      z modelami autora i książki. Każdy autor może mieć wiele książek. Bez
+      asocjacji deklaracje modeli wyglądałyby w ten sposób. Załóżmy,  że chcemy
+      dodać książkę do istniejącego autora. Należałoby przekazać obiektowi książki
+      id konkretnego autora. W przypadku usuwania autora trzeba zadbać również o
+      usunięcie jego książek. Z asocjacjami Active Record możemy ominąć te operacje
+      przez przekazanie RoR informacji, że modele są połączone. Oto poprawiony
+      program klas Author i Book. Dzięki tej zmianie tworzenie książki dla autora
+      jest bardzo łatwe. Również łatwiejsze jest usuwanie autora. Więcej informacji
+      o asocjacjach znajduje się w dalszej części przewodnika. Są tam również
+      różne tricki i porady przydatne podczas działań związanych z asocjacjami
+      a także kompletne odnośniki do metod i opcji dla asocjacji w RoR.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      RoR posiada 6 typów asocjacji - belongs_to, has_one, has_many, has_many :through,
+      has_one :through, has_and_belongs_to_many. Asocjacje są zaimplementowane
+      z użyciem wywołań w stylu makro, dzięki czemu można dodawać nowe funkcje
+      do modelu w sposób deklaratywny. Na przykład poprzez zadeklarowanie, że
+      jeden model belongs_to do innego informuje się o konieczności istnienia
+      kluczy głównego i obcego i ich zależności. Dla modelu wygenerowane zostaną
+      również różne przydatne funkcje. W pozostałej części poradnika znajdzie się
+      informacja o tym jak deklarować i używać różnych form asocjacji. Najpierw
+      jednak krótki wstęp i wyjaśnienie sytuacji, w których stosuje się poszczególne
+      typy asocjacji. Asocjacja belongs_to ustala relację jeden do jednego z innym
+      modelem w ten sposób, że każda instacja modelu należy do jednej instancji
+      innego modelu. Na przykład jeżeli w aplikacji są autorzy i książki a każda
+      może należeć do dokładnie jednego autora można napisać "belongs_to :author"
+      w klasie książki. Asocjacja belongs_to musi używać rzeczownika w liczbie
+      pojedynczej. Gdyby użyto formy mnogiej i napisano "Book.create(authors: @author)"
+      zostałby wyświetlony błąd mówiący o nieistniejącej stałej Book::Authors.
+      Dzieje się tak ponieważ RoR automatycznie wnioskuje nazwę klasy z nazwy
+      w asocjacji. Jeżeli nazwa asocjacji jest źle spluralizowana, wywnioskowana
+      klasa również będzie błędnie spluralizowana. W migracji można również użyć
+      belongs_to, np "t.belongs_to :author". Asocjacja has_one również ustawia
+      połączenie jeden do jednego z innym modelem, posiada jednak inną semantykę
+      i konsekwencje. Ta asocjacja wskazuje, że każda instacja modelu posiada lub
+      zawiera instancję innego modelu. Na przykład jeżeli każdy supplier posiada
+      jedno konto można napisać "has_one :account". W zależności od sytuacji, może
+      istnieć konieczność stworzenia unikalnego indexu i/lub ograniczeń klucza obcego
+      w kolumnie supplier_id, np "t.belongs_to :supplier, index: { unique: true },
+      foreign_key: true". Asocjacja has_many wskazuje na połączenie jeden do wielu
+      z innym modelem. Ta asocjacja jest często używana po drugiej stronie asocjacji
+      belongs_to. Wskazuje, że każda instajca modelu ma zero jub więcej instancji
+      innego modelu. Na przykład w aplikacji z autorami i książkami w modelu autora
+      można napisać "has_many :books". Nazwa modelu jest tu spluralizowana.
+      Asocjacja has_many :through jest często używana do ustawienia relacji
+      wiele do wielu. Informuje, że model może być połączony z jednym lub wieloma
+      modelami przez trzeci model. Na przykład lekarz i pacjenci mogą umawiać się
+      na wizyty. Potrzebne są trzy modele Physician Appointment i Patient. Kolekcja
+      join modeli może być obsługiwana przez metody asocjacyjne has_many. Na przykład
+      jeśli "physician.patients = patients", powstaną nowe join modele dla nowych
+      połączonych obiektów. Jeżeli modele istniejące wcześniej zostały usunięte,
+      odpowiadające im wiersze join zostaną również automatycznie usunięte.
+      Automatyczne usuwanie join modeli jest bezpośrednie bez wywoływania destroy
+      callbacków. Asocjacja has_many :through jest również przydatna do ustawiania
+      skrótów przez zagnieżdżone asocjacje has_many. Na przykład jeżeli dokument
+      ma wiele sekcji a każda sekcja ma wiele paragrafów lepiej mieć prostą kolekcję
+      wszystkich paragrafów w dokumencie. Asocjacja has_one :through ustawia połączenie
+      jeden do jednego z innym modelem. Wskazuje, że instancja modelu łączy się z
+      jedną instancją innego modelu przez trzeci model. Na przykład jeżeli każdy
+      supplier ma jedno konto i każde konto jest połączone z jedną historią konta.
+      Asocjacja has_and_belongs_to_many tworzy bezpośrednie połączenie wiele do
+      wielu z innym modelem, bez trzeciego modelu. Na przykład jeżeli aplikacja
+      posiada assemblies i parts i każdy assembly ma wiele partsów a każdy part
+      pojawia się w wielu assemblach. Jeżeli chce się ustawić relację jeden do
+      jednego po jednej stronie musi być belongs_to a po drugiej has_one. Skąd
+      wiadomo, który model powinien posiadać którą relację? To zależy od tego, w
+      której tabeli istnieje klucz obcy. Jej model będzie miał relację belongs_to.
+      Należy jednak zastanowić się również nad znaczeniem danych. Relacja has_one
+      wskazuje że jedna rzecz należy do innej rzeczy. Na przykład większy sens
+      ma supplier posiadający konto niż odwrotnie. Używanie "t.bigint :supplier_id"
+      sprawia że nazwa klucza obcego jest oczywista i wyraźna. W obecnej wersji RoR
+      można ukryć ten szczegół implementacji używając "t.references :supplier".
+      RoR posiada dwie metody deklarowania relacji wiele do wielu między modelami.
+      Łatwiejsza z nich to użycie metody has_and_belongs_to_many co tworzy
+      bezpośrednie powiązanie. Druga metoda to has_many :through. Asocjacja tworzona
+      jest pośrednio przez join model. Jeżeli model relacji jest traktowany jako
+      oddzielny rekord należy użyć has_many :through. Jeżeli nie ma potrzeby
+      korzystania z modelu relacji, łatwiej będzie użyć has_and_belongs_to_many.
+      W tym przypadku konieczne będzie jednak również stworzenie odpowiedniej
+      tabeli w bazie danych. Asocjacja has_many :through powinna być użyta jeżeli
+      join model potrzebuje walidacji, callbacków lub dodatkowych atrybutów.
+      Nieco bardziej zaawansowaną wersją asocjacji są polimorficzne asocjacje.
+      Z polimorficznymi asocjacjami model może należeć do więcej niż jednego modelu
+      w jednej asocjacji. Na przykład może istnieć model Picture należący do
+      modelu Employee lub do modelu Product. W modelu Picture "belongs_to :imageable,
+      polymorphic: true", a w modelach Employee i Product "has_many :pictures,
+      as: :imageable". Polimorficzne belongs_to to ustawianie interfejsu, który
+      może być używany przez jakikolwiek inny model. Z instancji modelu Employee
+      można uzyskać kolekcję zdjęć @employee.pictures. Podobnie można użyć
+      @product.pictures. Jeżeli istnieje instancja obiektu Picture, można dostać
+      się do jego rodzica przez @picture.imageable. Aby to zadziałało konieczne
+      jest zadeklarowanie kolumny klucza obcego i kolumny typu w modelu deklarującym
+      polimorficzny interfejs, np "t.bigint  :imageable_id, t.string  :imageable_type".
+      Migracja może być uproszczona przez użycie formy t.references. Należy napisać
+      "t.references :imageable, polymorphic: true". Podczas projektowania modelu
+      danych czasami pojawi się model, który powinien mieć relację do samego siebie.
+      Na przykład może istnieć potrzeba przechowywania wszystkich pracowników w
+      jednym modelu bazy danych z jednoczesną koniecznością śledzenia relacji, np
+      między menadżerem a podwładnymi. Ta sytuacja może być modelowana z asocjacjami
+      self-joining - "has_many :subordinates, class_name: "Employee",foreign_key:
+      "manager_id", "belongs_to :manager, class_name: "Employee", optional: true".
+      Z takimi ustawieniami można uzyskać @employee.subordinates i @employee.manager.
+      W pliku migracji należy dodać kolumnę referencji do tabeli odpowiadającej
+      modelowi Employee - "t.references :manager".
+    </p>
+  </li>
+
+  <li>
+    <p>
+
+    </p>
+  </li>
+
+
+  <li>
+    <p>
+
+    </p>
+  </li>
+
+  <li>
+    <p>
+
+    </p>
+  </li>
+
+</ul>
