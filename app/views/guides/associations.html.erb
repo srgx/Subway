@@ -119,14 +119,104 @@
 
   <li>
     <p>
-
+      Aby w skuteczny sposób korzystać z asocjacji Active Record dobrze jest
+      wiedzieć o kilku rzeczach: kontrolowaniu cachingu, unikaniu kolizji nazw,
+      updatowaniu schematu, kontrolowaniu zasięgu asocjacji i o asocjacjach
+      dwukierunkowych. Wszystkie metody asocjacyjne są zbudowane wokół cachingu,
+      który przechowuje wynik ostatnich zapytań dla przyszłych potrzeb. Cache
+      jest współdzielone nawet między metodami. Na przykład 2 kolejne wywołania
+      "author.books, author.books.size, author.books.empty?" będą korzystać z
+      cache. Co jeśli trzeba przeładować cache, ponieważ dane mogły zostać
+      zmienione przez inną część aplikacji? Wystarczy użyć metody reload, np
+      "author.books, author.books.size, author.books.reload.empty?". Podczas
+      tworzenia asocjacji nie ma pełnej dowolności wybierania nazw. Ponieważ
+      nowa asocjacja to nowa metoda modelu, nie należy używać  nazw wykorzystywanych
+      już przez ActiveRecord::Base. Nowa metoda nadpisałaby metodę bazową co
+      mogłoby doprowadzić do błędów. Nie należy używać nazw takich jak attributes
+      albo connection. Asocjacje są wyjątkowo przydatne, jednak nie są magiczne.
+      To użytkownik jest odpowiedzialny za dbanie o dopasowanie schematu bazy
+      do asocjacji. Dla asocjacji belongs_to konieczne jest stworzenie kluczy
+      obcych a dla has_and_belongs_to_many należy utworzyć odpowiednią tabelę
+      join. Jeżeli w klasie Book jest napisane "belongs_to :author", migracja
+      tworząca tabelę powinna zawierać "t.references :author" lub jeżeli tabela
+      już istnieje "add_reference :books, :author". Jeżeli chce się wymusić
+      integralność referencyjną na poziomie bazy danych należy dodać opcję
+      "foreign_key: true" do deklaracji kolumny 'reference'. Kolejny typ asocjacji
+      has_and_belongs_to_many, wymaga tabeli join. Jeżeli nazwa tabeli nie zostanie
+      jawnie przekazana opcji :join_table, Active Record wygeneruje ją automatycznie
+      z nazw klas w kolejności leksykalnej. Np, tabela join między modelami author
+      i book będzie się nazywała authors_books, ponieważ litera 'a' poprzedza 'b'.
+      Pierwszeństwo pomiędzy nazwami modeli jest obliczane z wykorzystaniem
+      operatora '<=>' klasy String. Oznacza to, że jeżeli stringi są różnej długości
+      i są równe do długości krótszego, dłuższy string będzie miał pierwszeństwo
+      przed krótszym. Na przykład mogłoby się wydawać że tabele paper_boxes i
+      papers wygenerują tabelę join "papers_paper_boxes" ze względu na długość
+      nazwy "paper_boxes". Powstanie jednak tabela "paper_boxes_papers", ponieważ
+      '_' jest mniejsze niż 's'. Niezależnie od nazwy, należy ręcznie wygenerować
+      tabelę join używając odpowiedniej migracji. Na przykład dla relacji
+      "has_and_belongs_to_many :parts" i "has_and_belongs_to_many :assemblies"
+      potrzebna jest tabela assemblies_parts. Powinna być ona tabelą bez klucza
+      głównego. Przekazana zostaje opcja "id: false", ponieważ tabela nie
+      reprezentuje modelu. Jest to wymagane aby asocjacja działała prawidłowo.
+      Jeżeli obserwowane są dziwne zachowania w powyższej asocjacji, np zniekształcone
+      id modeli lub wyjątki o konfliktach id, możliwe, że popełniony został właśnie
+      ten błąd. Do stworzenia tabeli join można też użyć metody create_join_table.
+      Domyślnie asocjacje szukają obiektów jedynie w zasięgu aktualnego modułu.
+      Może to być istotne jeżeli modele AR są deklarowane wewnątrz modułu.
+      Jeżeli klasy są zadeklarowane w tym samym module asocjacja zadziała, jeżeli
+      są w innych - nie. Aby użyć asocjacji z modelami z różnych przestrzeni nazw
+      konieczne jest przekazanie pełnej nazwy klasy w deklaracji asocjacji, np
+      "class_name: "MyApplication::Billing::Account"" w klasie supplier i
+      "class_name: "MyApplication::Business::Supplier"" w klasie account.
+      Asocjacje działają dwukierunkowo, co wymaga deklaracji w obu modelach, np
+      has_many i belongs_to. AR podejmie próbę automatycznej identyfikacji tych
+      modeli opartą na nazwie asocjacji. W ten sposób AR wczyta jedynie jedną
+      kopię obiektu klasy Author sprawiając, że aplikacja będzie szybsza i mniej
+      narażona na niespójność danych. AR automatycznie identyfikuje większość
+      asocjacji ze standardowymi nazwami jednak nie zrobi tego dla asocjacji
+      zawierających scope lub jedną z opcji :through :foreign_key. W tym przypadku
+      należy ręcznie zadeklarować dwukierunkową asocjację używając opcji :inverse_of.
     </p>
   </li>
 
 
   <li>
     <p>
-
+      Sekcja zwiera szczegóły każdego typu asocjacji, ich metody i opcje.
+      Metoda belongs_to to relacja jeden do jednego i oznacza że ta klasa
+      posiada klucz obcy. Jeżeli klucz obcy posiada inna klasa, nalezy użyć
+      has_one. Relacja belongs_to powoduje wygenerowanie 6 metod dla modelu.
+      Metody mają nazwy odpowiadające nazwie modelu. Kiedy inicjalizowana jest
+      nowa asocjacja has_one lub belongs_to, należy użyć prefiksu "build_"
+      aby ją zbudować. Metoda association.build jest używana do relacji has_many
+      i has_and_belongs_to_many. Aby ją utworzyć należy skorzystać z prefixu
+      create_. Metoda association zwraca powiązany obiekt lub nil. Jeżeli obiekt
+      został już wcześniej wczytany, zostanie zwrócona wersja z cache. Aby
+      nadpisać to zachowanie należy wywołać #reload_association na obiekcie
+      rodzica, np "@author = @book.reload_author". Metoda association= to
+      przypisanie obiektu do obiektu. Oznacza to pobranie klucza głównego i
+      ustawienie go jako klucza obcego obiektu. Metoda build_association zwraca
+      nowy obiekt odpowiedniego typu jednak nie powoduje zapisania go w bazie,
+      np "@author = @book.build_author(author_number: 123, author_name: "John Doe")".
+      Metoda create_association działa podobnie jak poprzednia z tym że obiekt
+      zostanie zapisany w bazie danych. Wersja z wykrzyknikiem generuje błąd
+      jeśli obiekt jest nieprawidłowy. Asocjacja belongs_to może zostać modyfikowana
+      z użyciem różnych opcji. Jeżeli opcja :autosave jest ustawiona na true, RoR
+      zapisze wszystkie załadowane obiekty asocjacji i usunie wszystko obiekty
+      zaznaczone do usunięcia za każdym razem kiedy główny obiekt zostanie zapisany.
+      Ustawienie autosave na false to nie to samo co brak ustawienia autosave.
+      Jeżeli opcja autosave nie jest ustawiona, nowe połączone obiekty będą zapisane
+      ale updatowane obiekty nie. Jeżeli nazwa modelu nie może być wywnioskowana
+      na podstawie nazwy asocjaciji można użyć opcji class_name. Np jeżeli książka
+      należy do autora ale nazwa modelu z autorem to Patron, można napisać
+      "belongs_to :author, class_name: "Patron"". Opcja :counter_cache używana jest
+      do efektywniejszego wyszukiwania liczby obiektów. Można np napisać w modelu
+      Book "belongs_to :author, counter_cache: true". W tym przypadku w modelu
+      Author należy dodać kolumnę books_count. Domyślną nazwę kolumny można
+      nadpisać podając ją zamiast wartości true - "counter_cache: :count_of_books".
+      Opcja :counter_cache powinna być zadeklarowa jedynie po stronie relacji
+      belongs_to. Kolumny counter_cache są dodawane do listy atrybutów read-only
+      modelu zawierającego poprzez attr_readonly. Opcja :dependent...
     </p>
   </li>
 
