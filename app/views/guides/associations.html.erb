@@ -216,7 +216,147 @@
       nadpisać podając ją zamiast wartości true - "counter_cache: :count_of_books".
       Opcja :counter_cache powinna być zadeklarowa jedynie po stronie relacji
       belongs_to. Kolumny counter_cache są dodawane do listy atrybutów read-only
-      modelu zawierającego poprzez attr_readonly. Opcja :dependent...
+      modelu zawierającego poprzez attr_readonly. Opcja :dependent ustawiona na
+      :destroy usuwa powiązane obiekty razem z głównym obiektem. Ustawiona na
+      :delete kasuje obiekty bezpośrednio z bazy bez wywoływania metody destroy.
+      Nie należy ustawiać opcji :dependent w asocjacji belongs_to połączonej
+      z has_many. Może to doprowadzić do powstania osieroconych rekordów w bazie.
+      Domyślnie RoR zakłada że nazwa klucza obcego to nazwa asocjacji z sufixem
+      _id. Opcja :foreign_key pozwala na bezpośrednie wybranie klucza obcego, np
+      "belongs_to :author, class_name: "Patron", foreign_key: "patron_id"".
+      Kolumny klucza obcego nigdy nie są tworzone automatycznie i trzeba je
+      dodać w migracji. Domyślnie klucz główny przechowywany jest w kolumnie o
+      nazwie id, można to jednak zmienić opcją :primary_key. Można np napisać
+      "self.primary_key = 'guid'" i "belongs_to :user, primary_key: 'guid'".
+      Kiedy wykonane zostanie "@user.todos.create", rekord @todo będzie miał
+      user_id jako wartość guid @user. Opcja inverse_of określa nazwę asocjacji
+      has_many lub has_one, która jest odwrotnością tej asocjacji. Opcja :polymorphic
+      ustawiona na true wskazuje, że jest to asocjacja polimorficzna. Opcja :touch
+      ustawiona na true powoduje, że kolumny updated_at lub updated_on powiązanych
+      obiektów będą ustawione na aktualny czas jeżeli obiekt jest zapisywany
+      lub usuwany. Np "belongs_to :author, touch: true" w klasie Book sprawi, że
+      podczas zapisywania lub usuwania książki, timestamp autora będzie aktualizowany.
+      Można też wprost wskazać timestamp - "touch: :books_updated_at".
+      Opcja :validate ustawiona na true powoduje walidacje powiązanych obiektów
+      w czasie zapisywania. Domyślnie jest ustawiona na false. Opcja :optional
+      z wartością true pozwala na pomijanie sprawdzania istnienia powiązanych obiektów.
+      Czasami może istnieć konieczność dostosowania zapytań używanych przez belongs_to.
+      Można to uzyskać z pomocą scope blocków, np "belongs_to :author, ->
+      { where active: true }". W bloku można użyć dowolnych standardowychmetod zapytań.
+      Metoda where informuje o warunkach, jakie obiekt musi spełnić. Metoda includes
+      jest używana do zadeklarowania asocjacji drugiego rzędu, które powinny być
+      załadowane kiedy asocjacja jest używana. Np jeżeli autor jest często
+      pozyskiwany z modelu, można przyspieszyć działanie aplikacji poprzez
+      włączenie autorów do asocjacji od rozdziałów do książek. Nie ma potrzeby
+      używania includes dla pośrednich relacji. Na przykład jeżeli istnieje relacja
+      "Book belongs_to :author", autor jest wczytywany automatycznie w razie
+      potrzeby. Z opcją :readonly powiązane obiekty wczytane z relacji będą tylko
+      do odczytu. Metoda select pozwala na nadpisanie SQL SELECT używanej do
+      uzyskania danych o powiązanych obiektach. Domyślnie RoR pobiera wszystkie
+      kolumny. Jeżeli metoda select jest używana w relacji belongs_to, należy też
+      ustawić opcję foreign_key aby mieć pewność prawidłowych wyników. Można sprawdzić
+      czy jakiekolwiek powiązane obiekty istnieją używając metody association.nil?.
+      Przypisywanie obiektu do asocjacji belongs_to nie zapisuje automatycznie
+      ani samego obiektu ani obiektu powiązanego. Asocjacja has_one to połączenie
+      jeden do jednego. Klucz obcy jest w drugim modelu. Jeżeli klasa ma klucz obcy,
+      należy użyć belongs_to. Relacja has_one generuje 6 metod. Metoda association
+      zwraca powiązany obiekt, w razie potrzeby z cache. Aby przeładować należy
+      użyć #reload_association na rodzicu. Wersja ze znakiem równości przypisuje
+      obiekt do obiektu. Metoda build association zwraca nowy obiekt odpowiedniego
+      typy bez zapisywania, create_association zapisuje. Wykrzyknik na końcu
+      generuje błędy. Metoda has_one posiada różne opcje. Opcja :as stosowana
+      jest przy relacjach polimorficznych. Opcja :autosave zapisuje obiekty powiązane.
+      Opcja :class_name pozwala na jawne przekazanie nazwy klasy. Opcja :dependent
+      informuje, co należy zrobić jeżeli właściciel obiektu jest usuwany. Wybór
+      destroy oznacza usunięcie, :delete usunięcie bezpośrednio w bazie, :nullify
+      ustawienie klucza obcego na NULL, :restrict_with_exception generuje błąd
+      jeżeli istnieje powiązany rekord, :restricted_with_error powoduje dodanie
+      błędu do obiektu właściciela jeżeli istnieje powiązany obiekt. Nie należy
+      ustawiać opcji :nullify dla relacji, które mają ograniczenie NOT NULL.
+      Jeżeli nie ustawi się dependent na destroy, nie będzie możliwości zmiany
+      powiązanych obiektów ponieważ klucz obcy zostanie ustawiony na niedozwoloną
+      wartość NULL. Opcja :foreign_key pozwala na jawne zadeklarowanie nazwy kolumny
+      klucza obcego. Metoda :inverse_of określa nazwę asocjacji belongs_to, która
+      jest odwrotnością tej asocjacji. Opcja :primary_key to ustawianie nazwy
+      kolumny klócza głównego. Opcja :source określa źródłową nazwę asocjacji
+      dla has_one :through. Metoda :source_type określa typ źródłowej asocjacji
+      dla asocjacji has_one :through, która przechodzi przez polimorficzną asocjację.
+      Metoda :through określa join model, przez który wykonywane jest zapytanie.
+      Opcja :touch sprawia że kolumny updated_at i updated_on powiązanego obiektu
+      będą updatowane jeżeli obiekt zostanie zapisany lub usunięty. Można też
+      wybrać, który timestamp ma być aktualizowany. Opcja :validate sprawia, że
+      powiązane obiekty są walidowane za każdym razem, kiedy obiekt jest zapisywany.
+      Dodatkowe opcje można przekazać przez bloki scope. Metoda where określa
+      warunki jakie obiekt musi spełnić, includes informuje jakie modele mają być
+      załadowane sprawiając, że aplikacja działa szybciej. Dzięki readonly, powiązane
+      obiekty będą tylko do odczytu, select pozwala na nadpisanie SQL SELECT. Domyślnie
+      RoR pobiera wszystkie kolumny. Istnienie powiązanych można sprawdzić metodą
+      association.nil?. Przypisanie obiektu do has_one powoduje jego automatyczne
+      zapisanie. Zapisany jest również obiekt zastępowany. Jeżeli przypisanie się
+      nie powiedzie metoda zwróci wartość false. Jeśli główny obiekt nie był zapisany
+      powiązane obiekty również nie będą zapisane aż do czasu zapisania rodzica.
+      Aby przypisać obiekt do relacji has_one bez zapisywania należy użyć metody
+      build_association. Relacja has_many to relacja jeden do wielu. Oznacza to,
+      że inna klasa posiada klucze obce. RoR wygeneruje dla tej relacji 17 metod.
+      Metoda collection to lista powiązanych obiektów, "collection<<" dodaje obiekt
+      do listy, collection.delete(object, ) usuwa jeden lub więcej obiektów przez
+      ustawienie ich kluczy obcych na NULL. Jeżeli obiekty były powiązane przez
+      "dependent: :destroy" lub "dependent: :delete_all" zostaną w odpowiedni
+      sposób usunięte(z użyciem metody destroy lub bezpośrednio). Kolejna metoda
+      to collection.destroy(object,...). Usuwa ona jeden lub więcej obiektów
+      wywołując na nich destroy. Obiekty będą zawsze usunięte z bazy ignorując
+      opcję :dependent. Metoda collection=(objects) ustawia wartość listy przez
+      dodawanie lub usuwanie obiektów. Zmiany w bazie danych są trwałe. Metoda
+      collection_singular_ids zwraca tablicę id obiektów z listy. Podobna funkcja
+      collection_singular_ids=(ids) ustawia listę obiektów na podstawie listy
+      kluczy. Obiekty są usuwane lub dodawane a zmiany są trwałe. Metoda collection.clear
+      usuwa wszystkie obiekty z listy zgodnie z zasadami z opcji dependent. Jeśli
+      opcja nie została ustawiona, stosowana jest domyślna strategia. Dla relacji
+      has_many :through to delete_all a dla has_many ustawianie kluczy obcych na
+      NULL. Obiekty zostaną usunięte jeżeli ustawiono dependent: :destroy lub
+      dependent: :delete_all. Metoda collection.empty? sprawdza czy lista obiektów
+      jest pusta, collection.size zwraca liczbe obiektów, collection.find(...)
+      wykorzystywana jest do szukania obiektów, collection.where(...) znajduje
+      obiekty na podstawie przekazanych warunków. Obiekty są ładowane lazily i
+      zostaną odczytane z bazy jedynie jeśli nastąpi próba ich odczytania.
+      Metoda collection.exists?(...) sprawdza czy obiekt spełniający jakiś warunek
+      istnieje w liście. Metoda collection.build zwraca obiekt lub tablicę obiektów
+      powiązanego typu. Obiekty nie zostaną zapisane. Aby je zapisać należy użyć
+      collection.create lub collection.create! generujące błąd. Metoda reload
+      wymusza odczyt z bazy danych. Jeżeli nie ma powiązanych obiektów zwraca
+      pustą relację. Relacja has_many posiada wiele opcji. Opcja :as wskazuje
+      na relację polimorficzną, :autosave zapisuje powiązane obiekty, :class_name
+      ustawia nazwę modelu, :counter_cache używana jest do ustawiania nazwy
+      dla ustawionego ręcznie :counter_cache w relacji belongs_to. Opcja :dependent
+      reguluje zachowanie powiązanych obiektów w trakcie usuwania obiektu głównego.
+      Dostępne opcje to :destroy, :delete_all, :nullify, :restrict_with_exception,
+      :restricted_with_error. Opcje :destroy i :delete_all wpływają na semantykę
+      metod collection.delete i collection= sprawiając że będą one usuwać powiązane
+      obiekty, kiedy są usuwane z listy. Nazwę klucza obcego ustawia :foreign_key,
+      :inverse_of określa nazwę drugiej strony relacji, :primary_key to nazwa
+      kolumny klucza głównego, :source to źródłowa nazwa asocjacji has_many :through.
+      Opcji tej używa się jedynie w sytuacji gdy nazwa nie może być wywnioskowana
+      automatycznie z nazwy relacji. Opcja :source_type określa typ relacji dla
+      has_many :through przechodzącej przez polimorficzną asocjację, :through to
+      nazwa join modelu, :validate sprawdza poprawność powiązanych obiektów.
+      Dodatkowe opcje dla has_many przekazywane mogą być w bloku. Opcja where
+      sprawdza czy obiekt spełnia jakieś warunki, extending to nazwa modułu używanego
+      do rozszerzenia proxy relacji, group to nazwa atrubutu do zgrupowania wyników
+      z zapytania GROUP BY w finderze SQL. Metoda includes wskazuje, które modele
+      powinny być załadowane aby przyspieszyć działanie aplikacji, limit wyznacza
+      maksymalną liczbę pobranych obiektów, offset pozwala wybrać liczbę pomijanych
+      rekordów, order to kolejność obiektów, readonly - obiekty tylko do odczytu,
+      select - nadpisywanie zapytania SQL SELECT. Jeżeli stosowana jest metoda select
+      należy pamiętać o koniecznośći istnienia kluczy głównego i obcego w powiązanych
+      modelach. W przeciwnym razie RoR wygeneruje błąd. Opcja distinct pozwala na
+      uniknięcie duplikatów w pobieranej liście obiektów. Aby zapewnić to zachowanie
+      na poziomie bazy danych należy użyć unikalnego indeksu na odpowiednich kolumnach.
+      W przypadku próby dodania kilka razy tego samego rekordu, wygenerowany zostanie
+      błąd. Sprawdzanie istnienia obiektu przy użyciu include? może doprowadzić do
+      race conditions. Przypisywanie obiektów do has_many powoduje ich zapisanie,
+      nieudany zapis zwraca false. Jeżeli obiekt główny nie był zapisane, pozostałe
+      obiekty również nie będą zapisane. Aby stworzyć relację has_many bez zapisywania
+      należy użyć collection.build. 4.4 has_and_belongs_to_many...
     </p>
   </li>
 
