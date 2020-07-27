@@ -356,13 +356,94 @@
       race conditions. Przypisywanie obiektów do has_many powoduje ich zapisanie,
       nieudany zapis zwraca false. Jeżeli obiekt główny nie był zapisane, pozostałe
       obiekty również nie będą zapisane. Aby stworzyć relację has_many bez zapisywania
-      należy użyć collection.build. 4.4 has_and_belongs_to_many...
+      należy użyć collection.build. Asocjacja has_and_belongs_to_many tworzy relację
+      wiele do wielu z innym modelem. W bazie danych oznacza to stworzenie tabeli
+      join z kluczami obcymi odnoszącymi się do każdej z klas. Relacja powoduje
+      wygenerowanie siedemnastu metod. Jeżeli tabela join ma dodatkowe kolumny
+      oprócz dwóch kolumn z kluczem obcym, będą one dodane jako atrybuty rekordu
+      dostępne przez tę relację. Zwrócone rekordy z dodatkowymi atrybutami będą
+      zawsze readonly ponieważ RoR nie może zapisać zmian w tych atrybutach.
+      Używanie dodatkowych atrybutów w tabelach join jest deprecated. Jeżeli
+      konieczne jest istnienie takiego skomplikowanego zachowania, należy użyć
+      has_many :through zamiast has_and_belongs_to_many. Metoda collection to
+      lista powiązanych obiektów, "collection<<" to dodawanie obiektu, metoda
+      collection.delete usuwa rekordy z tabeli join bez usuwania obiektów, podobnie
+      działa collection.destroy. Funkcja colection= ustawia listę obiektów a zmiany
+      w bazie danych są trwałe, collection_singular_ids zwraca listę kluczy id,
+      collection_singular_ids= ustawia listę obiektów na podstawie listy id,
+      collection.clear usuwa wszystkie obiekty z listy usuwając wiersze w tabeli
+      join, collection.empty? sprawdza czy lista jest pusta, collection.size
+      zwraca rozmiar listy. Do szukania obiektów można użyć metod find lub where
+      (w przypadku where obiekty są wczytywane lazily). Aby sprawdzić czy obiekt
+      istnieje używa się funkcji exists?. Do stworzenia nowego obiektu bez zapisywania
+      wykorzystywana jest metoda build, z zapisywaniem create lub create!.
+      Funkcja reload zmusza program do ponownego wczytania danych. Relacja
+      has_and_belongs_to_many posiada wiele różnych opcji. Aby ustawić nazwę
+      klucza obcego można wykorzystać opcję :association_foreign_key, :autosave
+      określa czy obiekty powiązane powinny być zapisywane lub usuwane jeśli
+      zapisywany jest obiekt główny. Aby ustawić nazwę modeli w relacji można
+      wykorzystać opcję :class_name, nazwa klucza obcego to :foreign_key.
+      Nazwa tabeli join ustawiana jest przez :join_table, opcja :validate
+      określa czy powiązane obiekty mają być walidowane w czasie zapisywania
+      obiektu głównego(domyślnie true). Zapytania w relacji mogą być konfigurowane
+      przy użyciu scope blocków. Opcja where określa warunki jakie ma spełnić obiekt.
+      Można je przekazać jako string lub hash. Jeżeli używa się where w stylu hash,
+      tworzenie obiektów przez tę asocjację będzie automatycznie scopowane z użyciem
+      hasha. Np funkcje assemblies.create lub assemblies.build stworzą obiekty,
+      w których wartość kolumny factory będzie ustawiona na "Seattle". Metoda
+      extending określa nazwę modułu do rozszerzenia asocjacji proxy, group
+      przyjmuję nazwę atrybutu używanego do grupowania wyników zapytania(używa
+      GROUP BY z SQL). Metoda includes określa relacje drugiego rzędu, które powinny
+      być załadowane jeśli asocjacja jest używana, limit to maksymalna liczba
+      rekordów pobieranych przez relację, offset pozwala na pominięcie rekordów,
+      order to kolejność pobieranych obiektów. Dzięki readonly obiekty pozyskane
+      poprzez relację będą tylko do odczytu, select nadpisuje SQL SELECT, distinct
+      usuwa duplikaty. Obiekt w relacji has_and_belongs_to_many zostaje automatycznie
+      zapisany w trakcie przypisania asocjacji. Jeżeli przypisywanych jest wiele
+      obiektów, wszystkie zostaną zapisane. Błędy walidacji anulują przypisanie
+      i powodują zwrócenie wartości false. Powiązane obiekty są zapisywane jeżeli
+      obiekt główny był wcześniej zapisany lub po jego zapisaniu. Aby stworzyć
+      relację bez zapisywania można wykorzystać metodę collection.build.
+      Normalne callbacki korzystają z cyklu życia obiektu pozwalając na wywoływanie
+      ich w różnych sytuacjach. Np callback before_save uruchamia się zanim obiekt
+      zostanie zapisany. Callbacki asocjacyjne są podobne do normalnych callbacków
+      z tą różnicą, że triggerują je wydarzenia w życiu asocjacji. Callbacki
+      asocjacyjne definiuje się przez dodawanie opcji w deklaracji asocjacji.
+      Jeżeli jest ich wiele mogą być dodane z tablicy. Dostępne callbacki to
+      before_add, after_add, before_remove i after_remove. Jeżeli callback
+      before_add wygeneruje wyjątek, obiekt nie zostanie dodany do kolekcji,
+      błąd w before_remove sprawi, że obiekt nie zostanie usunięty. Należy pamiętać
+      że callbacki uruchamiają się jedynie jeśli obiekt jest dodawany lub usuwany
+      za pośrednictwem listy relacji. Możliwości RoR nie ograniczają się do
+      wbudowanych funkcji relacji. Obiekty mogą być rozszerzane przez anonimowe
+      moduły, nowe findery, metody tworzące obiekty itd. Można np zaprojektować
+      metodę find_by_book_prefix w "relacji has_many :books do...". Jeżeli jakieś
+      rozszerzenie ma być stosowane przez wiele asocjacji, można użyć nazwanego
+      modułu - "{ extending FindRecentExtension }". Rozszerzenia mogą się odwoływać
+      do wnętrza asocjacji proxy używając trzech atrybutów metody proxy_association.
+      Metoda owner zwraca obiekt, którego asocjacja jest częścią, reflection zwraca
+      odbicie obiektu, który opisuje asocjację, target zwraca powiązany obiekt
+      dla belongs_to i has_one lub listę powiązanych obiektów dla has_many i
+      has_and_belongs_to_many.
     </p>
   </li>
 
   <li>
     <p>
-
+      Czasami istnieje potrzeba dzielenia pól i zachowań
+      pomiędzy różnymi modelami. Załóżmy, że istnieją modele Car, Motorcycle i
+      Bicycle. Mają one takie same atrybuty color i price. Posiadają również
+      własne kontrolery imetody działające w każdym przypadku trochę inaczej.
+      Aby utworzyć tabelę można użyć: "rails generate model vehicle type:string
+      color:string price:decimal{10.2}". Konieczne jest tu pole type, bez którego
+      Single Table Inheritance nie zadziała. Aby wygenerować modele dziedziczące
+      z vehicle należy użyć opcji --parent=PARENT. Generator nie utworzy odpowiedniej
+      migracji, ponieważ tabela już istnieje. Aby wygenerować model Car dziedziczący
+      po vehicle należy wpisać: "rails generate model car --parent=Vehicle".
+      Powstanie klasa posiadająca cechy modelu głównego. Obiekty Car będą zapisywane
+      w tabeli vehicles z polem type ustawionym na Car. W odpowiedni sposób zadziała
+      też metoda Car.all. Z tabeli vehicles zostaną pobrane wszystkie obiekty
+      typu Car.
     </p>
   </li>
 
