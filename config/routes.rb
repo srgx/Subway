@@ -17,6 +17,10 @@ Rails.application.routes.draw do
   get 'guides/layrender'
   get 'guides/viewform'
 
+  # Controllers
+  get 'guides/rrout'
+  get 'guides/ocontroller'
+
   resources :books do
     resources :comments, only: [ :create ]
   end

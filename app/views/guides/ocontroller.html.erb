@@ -1,0 +1,160 @@
+<h2>Action Controller Overview</h2>
+
+<ul>
+  <li>
+    <p>
+      Action Controller to litera C w modelu MVC. Po tym jak router zadecyduje,
+      który kontroler powinien zostać użyty w requeście, kontroler jest odpowiedzialny
+      za odpowiednie obsłużenie requestu i zwrócenie odpowiedniego outputu.
+      Action Controller wykonuje automatycznie większość potrzebnych zadań i
+      stosuje inteligentne konwencje, które ułatwiają jego obsługę. W większości
+      konwencjonalnych aplikacji RESTful, kontroler otrzyma request(niewidoczny
+      dla programisty), pobierze lub zapisze dane z modelu i użyje widoku do
+      utworzenie outputu HTML. Jeżeli kontroler musi wykonywać zadania w nieco
+      inny sposób to nie jest to problemem. Chodzi o to że jest to jednak
+      najpopularniejszy sposób jego działania. Kontroler może być postrzegany
+      jako pośrednik pomiędzy modelami i widokami. Sprawia, że dane modelu
+      są dostępne w widoku, który można pokazać użytkownikowi oraz zapisuje i
+      aktualizuje dane modelu.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Konwencja nazw kontrolera określa, że nazwy klas powinny być w formie
+      spluralizowanej, chociaż nie jest to wymagane(np ApplicationController).
+      Nazwa ClientsController jest lepsza niż ClientController, SiteAdminsController
+      jest lepsza niż SiteAdminController lub SitesAdminsController. Spluralizowane
+      jest ostatnie słowo nazwy kontrolera. Trzymanie się tej konwencji pozwala
+      na korzystanie z domyślnych generatorów ścieżek, np resources, bez potrzeby
+      kwalifikowania każdego :path lub :controller i sprawia, że korzystanie z
+      route helperów będzie jednolite w całej aplikacji.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Kontroler to klasa Rubyego dziedzicząca z ApplicationController i posiadająca
+      metody jak każda inna klasa. Kiedy aplikacja otrzymuje request, routing
+      zadecyduje, który kontroler i która akcja powinny zostać użyte. Następnie
+      RoR tworzy instancję odpowiedniego kontrolera i włącza metodę o nazwie
+      takiej samej jak nazwa akcji. Na przykład, jeżeli użytkownik odwiedzi
+      "/clients/new" aby dodać nowego klienta, RoR stworzy instancję ClientsController
+      i wywoła jego metodę new. Należy zauważyć, że pusta metoda z powyższego przykładu
+      zadziała, ponieważ RoR domyślnie renderuje widok "new.html.erb", chyba że
+      w akcji podano inaczej. Przez tworzenie nowego Client, metoda new może
+      stworzyć zmienną instancji @client, która będzie dostępna w widoku.
+      ApplicationController dziedziczy z ActionController::Base, które definiuje
+      wiele przydatnych metod. Ten przewodnik mówi o części z nich jednak więcej
+      informacji znajduje się w dokumentacji API lub w źródle. Jako akcje dostępne
+      są jedynie publiczne metody. Najlepiej jest mieć mało widocznych metod i
+      stosować private lub protected dla funkcji, które nie są akcjami.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Prawdopodobnie będzie istniała potrzeba dostępu do danych przesłanych przez
+      użytkownika lub innych parametrów w akcji kontrolera. W aplikacji webowej
+      możliwe są dwa rodzaje parametrów. Pierwsze to te przesyłane jako część
+      URL(query string parameters). Query string to wszystko po znaku "?" w URL.
+      Drugi typ parametru to dane POST. Te dane zwykle pochodzą z formularzy
+      HTML wypełnionych przez użytkownika. Nazywane są POST, ponieważ mogą być
+      przesłane jedynie jako część requestu HTTP POST. RoR nie rozróżnia query
+      stringów i parametrów POST. Wszystkie dostępne są w hashu params w kontrolerze.
+      Hash params nie ogranicza się do jednowymiarowych kluczy i wartości. Może
+      zawierać zagnieżdżone tablice i hasze. Aby wysłać tablicę wartości, należy
+      dołączyć pustą pare kwaparams.require(:product).permit(:name, data: {})dratowych nawiasów do nazwy klucza. Można np wysłać
+      request "GET /clients?ids[]=1&ids[]=2&ids[]=3". Znaki kwadratowych nawiasów
+      są niedozwolone w URL dlatego zostaną zapisane automatycznie w inny sposób.
+      Należy jednak o tym pamiętać w trakcie wysyłania requestów ręcznie. Wartość
+      params[:id] będzie równa ["1", "2", "3"]. Wartości parametrów to zawsze stringi
+      i RoR nie podejmuje próby zgadywania lub rzutowania typów. Wartości [nil]
+      lub [nil,nil,...] w params są ze względów bezpieczeństwa domyślnie zamieniane
+      na []. Aby wysłać hash należy podać nazwę klucza w nawiasach, np w formularzu
+      name="client[name]", name="client[address] itp. Kiedy formularz zostanie
+      wysłany wartością params[:client] będzie odpowiedni  zagnieżdżony hasz.
+      Obiekt params zachowuje się jak hash ale pozwala na zamienne używanie
+      symboli i stringów jako kluczy. Jeżeli tworzona jest aplikacja web service,
+      możliwe że potrzebne będzie przesyłanie parametrów w formacie JSON. Jeżeli
+      nagłówek "Content-Type" requestu jest ustawiony na "application/json", RoR
+      automatycznie załaduje parametry do hasha params, do którego zawartości będzie
+      można się dostać w zwykły sposób. Jeżeli włączone jest ustawienie config.wrap_parameters
+      w initializerze lub wrap_parameters było wywołane w kontrolerze, można bezpiecznie
+      pominąć root element w parametrze JSON. W tym przypadku parametry będą
+      sklonowane i zwrapowane z kluczem o nazwie opartej na nazwie kontrolera.
+      W JSON można pominąć słowo "company" i jeżeli dane wysyłane są przez
+      CompaniesController, zostanie on zwrapowany z kluczem :company. Nazwa klucza
+      i wrapowane parametry mogą być odpowiednio skonfigurowane. Więcej informacji
+      znajduje się w dokumentacji API. Parametry XML są parsowane za pośrednictwem
+      gema actionpack-xml_parser. Hash params będzie zawsze zawierał klucze
+      :controller i :action, jednak aby pobierać te wartości należy używać metod
+      controller_name i action_name. Wszystkie inne parametry definiowane przez
+      routing, np id będą również dostępne. Na przykład lista pokazująca aktywnych
+      lub nieaktywnych klientów może być wyświetlana za pośrednictwem ścieżki
+      z odpowiednim parametreparams.require(:product).permit(:name, data: {})m - "get '/clients/:status', to: 'clients#index',
+      foo: 'bar'". W przypadku przekazania wartości active, params[:status]
+      zostanie ustawiony na "active" a params[:foo] na "bar" tak jakby ta wartość
+      została przekazana w query stringu. Kontroler otrzyma też params[:action]
+      o wartości index i params[:controller] - clients. Możliwe jest ustawienie
+      globalnych domyślnych parametrów do generowania URL poprzez zdefiniowanie
+      metody o nazwie default_url_options w kontrolerze. Taka metoda powinna zwracać
+      hash z odpowiednimi wartościami i symbolami jako kluczami. Podane opcję
+      będą użyte jako punkt startowy w trakcie generowania URL, więc możliwe jest
+      ich nadpisanie opcjami przekazanymi w wywołaniach url_for. Jeżeli metoda
+      default_url_options zostanie zdefiniowana w klasie ApplicationController,
+      podane wartości będą użyte podczas generowania wszystkich URL. Metoda może
+      być też zdefiniowana w konkretnym kontrolerze, co sprawi, że będzie miała
+      wpływ tylko na URLe wygenerowane w jego obrębie. W requescie metoda nie jest
+      wywoływana dla każdego wygenerowanego URL. Ze względu na wydajność otrzymany
+      hash jest cachowany i ma miejsce maksymalnie jedno wywołanie metody na request.
+      Dzięki silnym parametrom AC nie pozwala na przypisania wartości do modelu
+      jeśli nie udzielono takiego pozwolenia. Wymaga to świadomej decyzji, które
+      atrybuty powinny mieć pozwolenie na masowe updaty. To praktyka, która zwiększa
+      bezpieczeństwo aplikacji i chroni przed przypadkowym updatowaniem wrażliwych
+      atrybutów modelu. Dodatkowo parametry mogą być oznaczone jako wymagane co
+      spowoduje, że przepłyną przez predefiniowany flow raise/rescue generujący
+      błąd 400 w przypadku braku wymaganych parametrów. Klucz id będzie miał
+      pozwolenie na inkluzję o ile występuje w params i ma połączoną zezwoloną wartość
+      skalarną. W przeciwnym razie klucz zostanie odfiltrowany i tablice hashe i
+      inne obiekty nie będą mogły zostać włączone. Dozwolone typy skalarne to
+      między innymi String Symbol NilClass Numeric TrueClass itp. Aby zadeklarować,
+      że wartość params musi być tablicą dozwolonych wartości skalarnych należy
+      zmapować klucz do pustej tablicy - "params.permit(id: [])". Czasami nie jest
+      możliwe lub wygodne zadeklarowanie poprawnych kluczy, parametrów hasza lub
+      jego wewnętrznej struktury. Wystarczy wtedy zmapować do pustego hasha.
+      Otwiera to jednak drogę do podawania dowolnego inputu. W tym przypadku
+      permit zapewnia, że wartości w zwróconej strukturze są dozwolonymi skalarami
+      i odfiltrowuje wszystkie inne. Aby zezwolić na cały hash parametrów można
+      użyć metody permit!. Oznacza ona hash i wszystkie subhashe jako dozwolone
+      i nie sprawdza dozwolonych skalarów, wszystko jest akceptowane. Stosując
+      permit! należy zachować wyjątkową ostrożność ponieważ pozwala to na masowe
+      przypisanie obecnych i przyszłych atrybutów modelu. Metoda permit może
+      być też użyta na zagnieżdżonych parametrach odpowiadających strukturze danych.
+      Permitted attributes mogą być też stosowane w akcji new. Powoduje to problem
+      wynikający z tego, że require nie może być używany na kluczu root, ponieważ
+      w zwykłych warunkach nie istnieje on w trakcie wywoływania new. Metoda
+      accepts_nested_attributes_for pozwala na updatowanie i usuwanie powiązanych
+      rekordów na podstawie parametrów id i _destroy. Hashe z kluczami integer
+      są traktowane inaczej i można zadeklarować atrybuty tak jakby były bezpośrednimi
+      dziećmi. Ten rodzaj parametrów uzyskuje się używając accepts_nested_attributes_for
+      w połączeniu z relacją has_many. Na przykład jeżeli parametry reprezentują
+      nazwę produktu i hash zawierający dowolne dane powiązane z produktem, aby
+      zezwolić na przypisanie nazwy produktu i całego hasza można użyć opcji
+      "params.require(:product).permit(:name, data: {})". API silnych parametrów
+      zostało zaprojektowane tak aby pasowało do najczęstszych przypadków użycia.
+      Nie znaczy to jednak, że sprawdza się w każdym przypadku. Dlatego istnieje
+      możliwość połączenia go z własnymi rozwiązaniami, tak aby jak najlepiej
+      dostosować program do sytuacji.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Session
+      ...
+    </p>
+  </li>
+
+
+</ul>

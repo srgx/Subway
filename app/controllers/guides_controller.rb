@@ -21,4 +21,10 @@ class GuidesController < ApplicationController
   def interface
   end
 
+  def ocontroller
+  end
+
+  def rrout
+  end
+
 end
