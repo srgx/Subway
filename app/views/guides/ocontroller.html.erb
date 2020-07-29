@@ -151,7 +151,80 @@
 
   <li>
     <p>
-      Session
+      Aplikacja posiada sesję, dla każdego użytkownika. Może w niej przechowywać
+      niewielkie ilości danych zachowywanych pomiędzy requestami. Sesja jest
+      dostępna jedynie w kontrolerze i widoku i może używać jesnego z różnych
+      mechanizmów przechowywania danych. CookieStore przechowuje wszystko po
+      stronie klienta. CacheStore przechowuje dane w cache RoR. ActiveRecordStore
+      to dane w bazie danych z użyciem Active Record(wymaga odpowiedniego gema).
+      MemCacheStore przechowuje dane w memcachowanym clusterze(to implementacja
+      legacy, lepiej używać CacheStore). Wszystkie typy sesji używają ciasteczka
+      do przechowywania unikalnego ID dla każdej sesji(ciasteczka muszą być
+      użyte, RoR nie pozwala na przekazywanie ID sesji w URL ze względów bezpieczeństwa).
+      Dla większości storów, ID jest używane do pobrania danych sesji z serwera,
+      np z tabeli bazy danych. Istnieje jednak jeden wyjątek i jest to domyślny
+      i zalecany store - CookieStore, który trzyma wszystkie dane sesji w ciasteczku
+      (ID jest w razie potrzeby nadal dostępne). Zaletą jest lekkość rozwiązania
+      i nie ma potrzeby konfigurowania nowej aplikacji w celu używania sesji.
+      Dane ciasteczek są kryptograficznie podpisane i zaszyfrowane. RoR nie podejmie
+      próby ich odczytania jeżeli zostały edytowane. CookieStore może przechowywać
+      około 4kB danych - dużo mniej niż inne story ale zwykle wystarczająco.
+      Przechowywanie dużych ilości danych w sesji jest odradzane niezależnie od
+      tego, który typ przechowalni jest używany. W szczególności należy wystrzegać
+      się przechowywania złożonych obiektów(wszystko poza prostymi obiektami Ruby),
+      ponieważ server może nie być w stanie odbudować ich pomiędzy requestami co
+      spowoduje błąd. Jeżeli sesja użytkownika nie przechowuje krytycznych danych
+      lub nie musi być dostępna przez długi czas(np jeżeli jest potrzebna tylko
+      do wiadomości flash), można pomyśleć o użyciu CacheStore. Spowoduje to
+      przechowywanie sesji z użyciem konfiguracji cache używanej przez aktualną
+      konfigurację aplikacji. Zaletą tego rozwiązania jest możliwość użycia
+      istniejącej infrastruktury cache do przechowywania sesji. Nie wymaga to
+      żadnej dodatkowej konfiguracji ani administrowania. Wadą jest nietrwałość
+      sesji, która może zniknąć w każdej chwili. Więcej o sesjach można przeczytać
+      w przewodniku na temat bezpieczeństwa. Jeżeli potrzebny jest inny mechanizm
+      przechowywania sesji, można go ustawić w initializerze. RoR ustawia klucz
+      sesji(nazwę ciasteczke) podczas podpisywania danych sesji. Może być on
+      również zmieniony w initializerze. Istnieje też możliwość przekazania klucza
+      :domain i określenia nazwy domeny dla ciasteczka. RoR ustawia dla CookieStore
+      tajny klucz uzywany do podpisywania danych sesji w pliku config/credentials.yml.enc.
+      Można go zmienić używając "rails credentials:edit". Zmiana secret_key_base
+      podczas używania CookieStore unieważni wszystkie istniejące sesje. W kontrolerze
+      można uzyskać dostęp do sesji za pomocą metody session. Sesje są ładowane
+      lazily. Jeżeli ich dane nie są pobierane w programie akcji, nie zostaną
+      załadowane. Z tego powodu nie ma potrzeby blokowania sesji. Wystarczy z nich
+      nie korzystać. Wartości sesji są przechowywane w parach key/value tak jak
+      w przypadku hasha. Aby przechować coś w sesji wystarczy przypisać to do
+      klucza. Aby usunąć coś z sesji, należy usunąć parę key/value. Można to zrobić
+      pisząc np "session.delete(:current_user_id)". Do resetowania sesji służy
+      metoda reset_session. Flash to specjalna część sesji czyszczona po każdym
+      requeście. Oznacza to, że wartości przechowywane w niej będą dostępne
+      jedynie w następnym requeście co jest użyteczne między innymi do przekazywania
+      wiadomości błędów. Dostęp do niej jest realizowany podobnie jak w przypadku
+      hasha. Na przykład w przypadku logowania kontroler może wysłać wiadomość,
+      która będzie pokazywana użytkownikowi w następnym requeście - "flash[:notice]".
+      Istnieje również możliwość przypisania wiadomości flash jako części przekierowania.
+      Można przypisać :notice, :alert lub ogólny :flash, np "redirect_to root_url, notice:".
+      Akcja destroy przekierowuje do root_url aplikacji, gdzie wiadomość zostanie
+      wyświetlona. To, co stanie się wiadomością umieszczoną we flash zależy w
+      całości od kolejnej akcji. Standardowo wyświetla się alerty błędów lub
+      powiadomień używając flasha w layoucie aplikacji "flash.each.do |n,m| ...".
+      W ten sposób, jeżeli akcja ustawi powiadomienie lub ostrzeżenie, layout
+      wyświetli je automatycznie. Można przekazywać wszystko co potrafi przechowywać
+      sesja. Nie trzeba ograniczać się do alertów i powiadomień. Jeżeli wartość
+      flasha ma być utrzymana do kolejnego requesta należy użyć metody keep.
+      Domyślnie, dodawanie wartości do flasha sprawia, że będą dostępne w następnym
+      requeście jednak czasami istnieje potrzeba użycia ich w tym samym requeście.
+      Na przykład jeżeli działanie akcji create zakończy się niepowodzeniem i
+      wyrenderowany zostanie bezpośrednio szablon new, nie spowoduje to użycia
+      nowego requesta. Mimo to ciągle istnieje możliwość wyświetlenia wiadomości
+      z użyciem flasha. Aby to osiągnąć trzeba użyć metody flash.now tak samo jak
+      używa się normalnego flasha.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Cookies
       ...
     </p>
   </li>
