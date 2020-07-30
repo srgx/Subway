@@ -224,7 +224,106 @@
 
   <li>
     <p>
-      Cookies
+      Aplikacja może przechowywać niewielkie ilości danych po stronie klienta - cookies.
+      Będą one przechowywane pomiędzy requestami a nawet sesjami. RoR pozwala na łatwy
+      dostęp do cookies dzięki metodzie cookies, która działa jak session i hash. Należy
+      zauważyć, w sesji można ustawiać wartości na kluczy na nil, aby usunąć wartość
+      ciasteczka trzeba użyć metody cookies.delete(:key). RoR posiada również signed
+      cookie jar i zaszyfrowany cookie jar do przechowywania wrażliwych danych. Signed
+      cookie jar dołącza kryptograficzną sygnaturę na wartościach ciasteczka aby chronić
+      ich integralność. Zaszyfrowany cookie jar poza podpisywaniem wartosci szyfruje je
+      dzięki czemu nie mogą być odczytane przez end usera. Te wyspecjalizowane cookie jary
+      używają serializera aby serializować przypisane wiadomości w stringi i deserializować
+      do postaci obiektów Ruby w czasie odczytu. Można wybrać, którego serializera należy
+      użyć, np "...cookies_serializer = :json". Domyślny serializer dla nowej aplikacji to
+      :json. Aby zachować zgodność ze starymi aplikacjami z istniejącymi ciasteczkami, jeśli
+      serializer nie jest zdefiniowany wykorzystuje się domyślnie opcję :marshal. Można też
+      ustawić opcję :hybrid. W tym przypadku RoR transparentnie zdeserializuje istniejące
+      Marshal-serialized cookies w trakcie odczytu i zapisze je ponownie jako JSON. Jest to
+      przydatne w trakcie migrowania istniejących aplikacji do serializera :json. Można też
+      przekazać customowy serializer, który odpowiada na wiadomości load i dump. Należy
+      pamiętać, że nie wszystkie obiekty Ruby mogą być serializowane jako JSON, np obiekty
+      Date i Time będą serializowane jako stringi a klucze haszy zostaną zamienione w stringi.
+      W ciasteczkach powinno się przechowywać jedynie proste dane. W przypadku złożonych należy
+      samodzielnie zadbać o ich poprawną konwersję w kolejnych requestach. Jeżeli używa się
+      cookie session store to odnosi się to również do hashów metod session i flash.
+      
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      ActionController sprawia, że renderowanie danych XML i JSON jest bardzo łatwe.
+      Kontroler wygenerowany przez scaffolding posiada pokazujące to metody. Nie stosuje
+      się tu konwersji "@users.to_xml". Jeżeli obiekt nie jest stringiem RoR automatycznie
+      wywoła metodę to_xml.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Filtry to metody uruchamiane przed, po lub wokół akcji kontrolera. Są dziedziczone co
+      oznacza że ustawienie filtra w ApplicationController spowoduje jego działanie dla
+      wszystkich kontrolerów w aplikacji. Filtry "before" mogą zatrzymać cykl requestów.
+      Jednym z popularnych filtrów "before" jest ten, który sprawdza czy użytkownik jest
+      zalogowany przed uruchomieniem jakiejś akcji. Można użyć "before_action :require_login"
+      w kontrolerze. Metoda przechowuje wiadomość we flashu i przekierowuje użytkownika w
+      odpowiednie miejsce. Akcja i pozostałe filtry nie zostaną włączone. W podanym przykładzie
+      filtr jest dodany do ApplicationController i wszystkie inne kontrolery dziedziczą go.
+      Aby użytkownik mógł korzystać z aplikacji musi być zalogowany. Nie wszystkie kontrolery
+      i akcje powinny tego wymagać(dostępna powinna być np strona logowania lub rejestracji).
+      Można ominąć ten filtr przed poszczególnymi akcjami używając skip_before_action. Teraz
+      metody new i create będą działać bez konieczności logowania użytkownika. Można używać
+      opcji only wskazującej akcje lub except, która wyklucza określone metody. Wywoływanie
+      tego samego filtra wiele razy z różnymi opcjami nie zadziała, ponieważ ostatnia definicja
+      filtra nadpisze poprzednie. Poza filtrami "before" można też uruchamiać filtry po akcji,
+      która miała miejsce. Można je też włączyć w obu momentach. Filtry "after" są podobne do
+      "before". Mają jednak dostęp do danych odpowiedzi, która ma być wysłana do użytkownika.
+      Filtry "after" nie mogą zatrzymać akcji, są uruchamiane po tym gdy się powiodła. Jeśli
+      w cyklu requestów zostanie wygenerowany błąd filtr after nie zadziała. Filtry around
+      uruchamiają powiązane akcje przez yielding, podobnie jak ma to miejsce w przypadku
+      middlewaru Rack. Na przykład na stronie gdzie zmiany mają approval workflow a administrator
+      powinien mieć możliwość łatwego podglądu, można umieścić je w transakcji. Filter "around"
+      wrapuje też rendering. Jeżeli podanym przykładzie widok czyta dane z bazy, zrobi to
+      w obrębie transakcji i zaprezentuje dane w podglądzie. Można zrezygnować z yieldowania i
+      zbudować response samodzielnie. W tym przypadku akcja nie zostanie uruchomiona. Zwykle
+      filtrów używa się z prywatnymi metodami. Może je też stosować na 2 inne sposoby. Pierwszy
+      to użycie bloku z metodami *_action. Blok otrzymuje kontroler jako parametr. W ten sposób
+      filtr require_login może być zapisany w inaczej. W tym przypadku filtr musi używać send
+      ponieważ metoda logged_in? jest prywadna a filtr nie działa w zasięgu kontrolera. Nie jest
+      to zalecana metoda implementacji filtra, jednak w prostych przypadkach może być przydatna.
+      Dla around_action, block yielduje w akcji. Drugi sposób stosowania filtrów to klasy.
+      Przydają się one w skomplikowanych przypadkach, w których użycie 2 poprzednich metod
+      byłoby zbyt trudne. Filtr logowania może być napisany z użyciem klas. Nie jest to jednak
+      idealny przykład zastosowania tej metody. Klasa filtra musi posiadać metodę z nazwą taką
+      jak nazwa filtra. Na przykład dla filtra before_action konieczna jest metoda before.
+      Metoda around musi użyć yield do uruchomienia akcji.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Cross-site request forgery to rodzaj ataku, w którym strona oszukuje użytkownika i sprawia,
+      że wysyła on request do innej strony dodając modyfikując lub usuwając dane bez swojej wiedzy
+      lub pozwolenia. Pierwszym krokiem do zabezpieczenia przed tego typu atakiem jest ustawienie
+      wszystkich destrukcyjnych akcjina requesty inne niż GET. Jeżeli stosuje się konwencję
+      REST ten warunek jest już spełniony. Mimo to złośliwa strona nadal może stosunkowo łatwo
+      wysłać requesty non-GET. Aby się przed tym zabezpieczyć, stosowana jest ochrona request
+      forgery protection. Jak wskazuje jej nazwa chroni przed podrobionymi requestami. Do każdego
+      requesta dodawany jest tajny token znany jedynie serwerowi. W ten sposób, jeżeli request
+      przychodzi bez poprawnego tokenu, nastąpi odmowa dostępu. Token dodawany jest do formularza
+      wygenerowanego przez form helpery jako ukryte pole i przez większość czasu nie trzeba zwracać
+      na niego uwagi. Jeżeli formularz tworzony jest ręcznie lub token musi być dodany z innego
+      powodu, można go uzyskać dzięki metodzie form_authenticity_token. Generuje ona prawidłowy
+      token uwierzytelniania. Jest to przydatne w miejscach gdzie RoR nie dodaje go automatycznie,
+      np we własnch wywołaniach Ajax. Więcej informacji na temat bezpieczeństwa aplikacji można
+      znaleźć w przewodniku Security Guide.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      10 The Request and Response Objects
       ...
     </p>
   </li>
