@@ -323,7 +323,100 @@
   
   <li>
     <p>
-      10 The Request and Response Objects
+      W każdym kontrolerze są 2 metody akcesorów wskazujące na obiekty request i response powiazane
+      z cyklem requestu, który jest obecnie wykonywany. Metoda request zawiera instację klasy RoR
+      ActionDispatch::Request a metoda response zwraca obiekt response reprezentujący to co zostanie
+      wysłane do klienta. Obiekt request zawiera dużo wartościowych informacji o requeście, który
+      przychodzi od klienta. Można uzyskać między innymi hostname, metodę HTTP użytą do requesta,
+      nagłówki, numer portu, url itd. RoR zbiera wszystkie parametry w hashu params niezależnie od
+      tego czy zostały przekazane jako część query string czy w zapytaniu POST. Obiekt request ma
+      3 akcesory pozwalające na dostęp do tych parametrów w zależności od tego skąd pochodzą. Hash
+      query_parameters zawiera parametry przekazane jako query string, a request_parameters te, które
+      zostały przekazane przez zapytanie post. Hash path_parameters zawiera parametry, które były
+      częścią ścieżki routera prowadzącej do tego kontrolera i akcji. Obiekt response zwykle nie jest
+      używany w sposób bezpośredni jednak może to mieć miejsce np w przypadku filtrów after. Niektóre
+      z dostępnych metod to body, status, location itp. Aby ustawić własne nagłówki dla response należy
+      użyć metody response.headers. Atrybut headers to hash mapujący nazwy headerów do ich wartości i
+      RoR ustawi niektóre z nich automatycznie. Jeżeli istnieje potrzeba dodania lub zmiany headera
+      wystarczy przypisać go do response.headers, np "response.headers["Content-Type"] = ...". W
+      powyższym przypadku lepiej byłoby użyć bezpośrednio settera content_type.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      RoR posiada 2 wbudowane mechanizmy uwierzytelniania. Pierwszy z nich to basic authentication.
+      Działa w większości przeglądarek i klientów HTTP. Na przykład może istnieć sekcja dostępna
+      jedynie po wpisaniu nazwy użytkownika i hasła w zwykłym oknie dialogowym przeglądarki.
+      Używanie tego rodzaju uwierzytelniania jest bardzo proste i wymaga jedynie jednej metody
+      http_basic_authenticate_with. Dzięki temu możliwe jest stworzenie kontrolerów dziedziczących
+      po AdminsContoller, w których zabezpieczenie zostanie uruchomione dla wszystkich akcji. Drugi
+      rodzaj uwierzytelniania to digest authentication. Jest lepszym rozwiązaniem niż poprzednie
+      ponieważ nie wymaga od klienta wysyłania niezaszyfrowanego hasła poprzez sieć(mimo że basic
+      authentication jest bezpieczne dzięki HTTPS). Używanie digest_authentication również jest
+      proste i wymaga tylko jednej metody authenticate_or_request_with_http_digest. Jak widać
+      w podanym przykładzie blok przyjmuje tylko jeden parametr - nazwę użytkownika i zwraca hasło.
+      Zwrócenie wartości false lub nil spowoduje niepowodzenie uwierzytelnienia.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Czasami może istnieć potrzeba wysłania pliku użytkownikowi zamiast renderowania strony HTML.
+      Wszystkie kontrolery RoR posiadają metody send_data i send_file streamujące dane do użytkownika.
+      Metoda send_file przyjmuje nazwę pliku z dysku i wysyła jego zawartość. Aby wysłać dane należy
+      użyć send_data. Metoda download_pdf wyśle dane wygenerowane jako plik pdf. Niektóre z wysyłanych
+      plików nie są przeznaczone do pobierania, np obrazy na stronie HTML. Żeby określić plik w ten
+      sposób należy użyć opcji :disposition ustawionej na "inline". Przeciwnym i domyślnym ustawieniem
+      jest "attachment". Do wysyłania istniejących plików służy metoda send_file. Odczyta i wyśle
+      plik w porcjach 4kB bez odczytywania go do pamięci w całości. Można wyłączyć streaming opcją
+      :stream lub ustawić rozmiar bloku przy pomocy :buffer_size. Jeżeli pole :type nie zostało
+      ustawione, nastąpi próba jego odgadnięcia na podstawie rozszerzenia pliku z opcji :filename.
+      Jeżeli typ zawartości dla rozszerzenia nie jest zarejestrowany zostanie ustawiony domyślnie na
+      application/octet-stream. Należy zachować ostrożność podczas używania danych pochodzących od
+      klienta(params,cookies itp.) do lokalizowania danych na dysku. Może to sprawić, że użytkownik
+      odczyta dane, do których nie powinien mieć dostępu. Nie zaleca się streamowania statycznych
+      plików przez RoR jeśli zamiast tego można przechowywać je w publicznym folderze na serwerze.
+      Dużo wydajniejszą opcją jest pozwolenie na bezpośrednie pobieranie plików z użyciem Apache
+      lub innego serwera bez niepotrzebnego przesyłania requesta przez całą aplikację RoR. Chociaż
+      metoda send_data działa dobrze, to w przypadku aplikacji RESTful posiadających oddzielne
+      akcje przeznaczone do pobierania plików, zwykle nie jest potrzebna. W terminologii REST, plik
+      PDF z poprzedniego przykładu może być postrzegany jako inny rodzaj reprezentacji zasobów
+      klienta. RoR zapewnia łatwy i gładki sposób realizowania pobierań RESTful. Na przykład
+      można pominąć streamowanie i bezpośrednio umieścic PDF w akcji show. Aby program zadziałał
+      należy dodać typ PDF MIME do RoR. Można to zrobić ustawiając odpowiednią opcję w pliku
+      "config/initializers/mime_types.rb", "Mime::Type.register "application/pdf", :pdf". Pliki
+      konfiguracji nie są odczytywana po każdym requeście dlatego aby zmiany zostały wprowadzone
+      należy zrestartować serwer. Teraz użytkownik może uzyskać wersję PDF klienta przez dodanie
+      ".pdf" do URL. RoR pozwala też na streamowanie danych innych niż pliki. Można streamować
+      wszystko co jest potrzebne w obiekcie response. Moduł ActionController::Live pozwala na
+      stworzenie stałego połączenia z przeglądarką. Używając tego modułu istnieje możliwość wysyłania
+      dowolnych danych do przeglądarki w konkretnych momentach. Włączenie go za pomocą include w
+      klasie kontrolera pozwoli wszystkim akcjom na streamowanie danych. Powyższy program będzie
+      utrzymywał stałe połączenie z przeglądarką i wyśle 100 wiadomości "hello world\n" co sekundę.
+      Należy zwrócic uwagę na kilka rzeczy. Trzeba pamiętać o zamknięciu streamu response. Bez tego
+      socket zostanie otwarty na zawsze. Konieczne jest też wcześniejsze ustawienie odpowiedniego
+      typu zawartości. W tym przypadku to "text/event-stream". Wynika to z tego, że headery nie mogą
+      być zapisywane po tym jak response zostanie zatwierdzone(response.commited? zwróci true). Ma to
+      miejsce kiedy z response używane są metody commit lub write. Załóżmy, że tworzona jest maszyna
+      Karaoke i użytkownik chce otrzymać tekst określonej piosenki. Każda piosenka ma własną liczbę
+      linii i każda linia trwa przez czas równy wartości num_beats. Gdybyśmy chcieli wysyłać dane
+      w stylu Karaoke, można do tego użyć ActionController::Live. Powyższy program wysyła kolejną
+      linię dopiero po tym, gdy skończono śpiewać poprzednią. Streamowanie danych jest narzędziem
+      o dużych możliwościach. Istnieje możliwość wyboru tego co i kiedy należy wysyłać przez stream
+      response. Należy jednak pamiętać o kilku rzeczach. Każdy response stream tworzy nowy wątek i
+      kopiuje do niego lokalne zmienne z oryginalnego wątku. Posiadanie zbyt dużej liczby zmiennych
+      lokalnych wątku lub wątków może w negatywny sposób wpłynąć na wydajność. Niezamknięte response
+      streamy sprawiają, że odpowiadający im socket pozostanie otwarty na zawsze, dlatego należy
+      pamiętać o użyciu metody close, kiedy połączenie przestanie być potrzebne. Serwery WEBrick
+      buforują wszystkie odpowiedzi response dlatego ACtionController::Live w ich przypadku nie
+      zadziała. Należy używać serwerów nieposiadających tej cechy.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      13 Log Filtering
       ...
     </p>
   </li>
