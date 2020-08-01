@@ -64,7 +64,7 @@
       stringów i parametrów POST. Wszystkie dostępne są w hashu params w kontrolerze.
       Hash params nie ogranicza się do jednowymiarowych kluczy i wartości. Może
       zawierać zagnieżdżone tablice i hasze. Aby wysłać tablicę wartości, należy
-      dołączyć pustą pare kwaparams.require(:product).permit(:name, data: {})dratowych nawiasów do nazwy klucza. Można np wysłać
+      dołączyć pustą pare kwadratowych nawiasów do nazwy klucza. Można np wysłać
       request "GET /clients?ids[]=1&ids[]=2&ids[]=3". Znaki kwadratowych nawiasów
       są niedozwolone w URL dlatego zostaną zapisane automatycznie w inny sposób.
       Należy jednak o tym pamiętać w trakcie wysyłania requestów ręcznie. Wartość
@@ -92,7 +92,7 @@
       controller_name i action_name. Wszystkie inne parametry definiowane przez
       routing, np id będą również dostępne. Na przykład lista pokazująca aktywnych
       lub nieaktywnych klientów może być wyświetlana za pośrednictwem ścieżki
-      z odpowiednim parametreparams.require(:product).permit(:name, data: {})m - "get '/clients/:status', to: 'clients#index',
+      z odpowiednim parametrem - "get '/clients/:status', to: 'clients#index',
       foo: 'bar'". W przypadku przekazania wartości active, params[:status]
       zostanie ustawiony na "active" a params[:foo] na "bar" tak jakby ta wartość
       została przekazana w query stringu. Kontroler otrzyma też params[:action]
@@ -416,8 +416,60 @@
   
   <li>
     <p>
-      13 Log Filtering
-      ...
+      RoR dla każdego środowiska przechowuje plik w folderze log. Te pliki są bardzo przydatne w
+      czasie debugowania jednak w działającej aplikacji nie wszystkie dane powinny być zapisywane.
+      Można odfiltrować wrażliwe parametry requestu z plików logów przez dodanie ich do ustawienia
+      config_filter_parameters w konfiguracji aplikacji. Te parametry będą oznaczone jako [FILTERED]
+      w logu - "config.filter_parameters << :password". Przekazane parametry będą filtrowane przez
+      częściowe dopasowanie wyrażenia regularnego. RoR dodaje domyślnie :password w odpowiednim
+      initializerze(initializers/filter_parameter_logging.rb) i zajmuje się typowymi parametrami
+      aplikacji password i password_confirmation. Czasami dobrze jest odfiltrować z plików logów
+      pewne wrażliwe lokalizacje do których przekierowuje aplikacja. Można to zrobić za pomocą
+      opcji config.filter_redirect - "config.filter_redirect << 's3.amazonaws.com'". Można ją ustawić
+      na Stringa Regexp, lub tablicę zawierającą obie wartości. Pasujące URLe zostaną oznaczone
+      jako [FILTERED].
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Możliwe, że aplikacja będzie posiadała błędy lub generowała wyjątki wymagające obsłużenia.
+      Na przykład jeżeli użytkownik klika w link do zasobu, który już nie istnieje w bazie danych,
+      Active Record wygeneruje wyjątek ActiveRecord::RecordNotFound. Domyślne zachowanie Railsów
+      w przypadku wyjątku to wyświedlenie wiadomości "500 Server Error" dla wszystkich przypadków.
+      Jeśli request został utworzony lokalnie, wyświetlony będzie trackback i dodatkowe informacje
+      ułatwiające rozwiązanie problemu. Jeśli request był remote RoR wyświetli prostą wiadomość
+      "500 Server Error" lub "404 Not Found" w przypadku błędu routingu lub nieistniejącego rekordu.
+      Czasami istnieje potrzeba dostosowania tego, w jaki sposób wyjątki są przechwytywane lub
+      pokazywane użytkownikowi. W aplikacji RoR istnieje kilka poziomów obsługi błędów. Domyślnie
+      jeżeli istnieją jakieś nieobsłużone błędy, aplikacja produkcyjna renderuje wiadomości 404
+      lub 500. Ich treść jest zawarta w statycznych plikach HTML w folderze publicznym(404.html i
+      500.html). Można dostosować te pliki wzbogacając je o nowe informacje i style, należy jednak
+      pamiętać, że są statyczne i nie można w nich używać ERB, SCSS, CoffeeScript i layoutów.
+      Jeżeli istnieje konieczność podjęcia bardziej wyszukanych działań, można użyć rescue_from -
+      metody obsługującej błędy konkretnego typu(lub typów) w całym kontrolerze i jego podklasach.
+      Kiedy ma miejsce błąd przechwycony przez rescue_from, zostaje przekazany do handlera. Handlerem
+      może być metoda lub obiekt Proc przekazany opcji :with. Można też użyć bloku bezpośrednio zamiast
+      jawnego obiektu Proc. W ten sposób można na przykład użyć rescue_from do przechwycenia
+      wszystkich błędów ActiveRecord::RecordNotFound i obsłużenia ich w odpowiedni sposób.
+      Oczywiście podany przykład to nic więcej jak skomplikowanie aplikacji i w tym przypadku
+      nie poprawia domyślnej obsługi błędów. Pokazuje jedynie możliwości jakie oferuje rescue_from.
+      Można na przykład stworzyć własne klasy błędów generowanych jeśli użytkownik nie ma dostępu
+      do pewnych sekcji aplikacji. Stosowanie rescue_from z Exception lub StandardError zablokowałoby
+      RoR możliwość poprawnej obsługi błędów i spowodowało poważne efekty uboczne. Dlatego, poza
+      wyjątkowymi sytuacjami, nie zaleca się tego rozwiązania. Aplikacja działająca w środowisku
+      produkcyjnym, dla wszystkich błędów ActiveRecord::RecordNotFound renderuje stronę 404.
+      Jeżeli nie jest potrzebne inne zachowanie, nie ma potrzeby obsługiwania tego wyjątku.
+      Niektóre wyjątki można przechwycić jedynie z klasy ApplicationController ze względu na to,
+      że generowane są przed inicjalizacją kontrolera i wykonaniem akcji.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Jeżeli istnieje potrzeba zapewnienia, że komunikacja z kontrolerem odbywa się jedynie przez
+      HTTPS, można to osągnąć przez włączenie middleware ActionDispatch::SSL opcją config.force_ssl
+      w konfiguracji środowiska.
     </p>
   </li>
 
