@@ -1,8 +1,115 @@
 <h2>Rails Routing</h2>
 
 <ul>
+
   <li>
     <p>
+      Router RoR rozpoznaje URLe i wysyła je do akcji kontrolera lub do aplikacji Rack. Może również
+      generować ścieżki i URLe bez potrzeby ręcznego wpisywania stringów w widokach. Kiedy aplikacja
+      RoR otrzymuje request GET /patients/17 router próbuje dopasować go do akcji kontrolera. Na
+      przykład jest wysyłany do akcji show kontrolera patients z id równym 17 w params. RoR stosuje
+      w tym przypadku snake case dla wieloczłonowych nazw kontrolerów. Możliwe jest generowanie
+      ścieżek i URLi. Na przykład dla zdefiniowanej wcześniej ścieżki, można wywołać funkcję
+      patient_path(@patient). Nie ma konieczności przekazywania id w route helperze. Ścieżki
+      aplikacji przechowywane są w zwykłym pliku routes.rb. Można w nim używać normalnego języka
+      Ruby. Należy jednak uważać na konflikty nazw z metodami DSL. Blok "...routes.draw" jest
+      konieczny do ustanowienia przestrzeni dla DSL routera i nie należy go usuwać.
     </p>
   </li>
+  
+  <li>
+    <p>
+      Resource routing pozwala na szybkie zadeklarowanie wszystkich popularnych ścieżek dla
+      kontrolera zasobów. Przeglądarki pobierają strony poprzez zapytania GET POST PATCH PUT i
+      DELETE. Każda metoda to prośba o wykonanie operacji na zasobie. Ścieżka zasobu mapuje wiele
+      powiązanych requestów do akcji w jednym kontrolerze. Na przykład jeżeli aplikacja RoR
+      otrzyma request DELETE /photos/17 i posiada ścieżkę resources :photos, request zostanie
+      przekazany akcji destroy w kontrolerze photos z id = 17 w params. W RoR ścieżka zasobów
+      zapewnia mapowanie pomiędzy HTTP i URL a akcjami kontrolera. Każda akcja odpowiada
+      konkretnej operacji CRUD na bazie danych. Pojedynczy wpis w pliku routingu - resources :photos,
+      tworzy siedem ścieżek wskazujących na kontroler Photos. Ponieważ router używa HTTP i URL
+      do dopasowania requestów, 4 URLe mogą odpowiadać 7 akcjom. Ścieżki RoR są dopasowywane w
+      kolejności definiowania. Dlatego należy pamiętać o ułożeniu ich w odpowiedniej kolejności.
+      Stworzenie ścieżki zasobów spowoduje również wygenerowanie różnych helperów w kontrolerze
+      aplikacji. W przypadku resources :photos to photos_path, new_photo_path, edit_photo_path(:id),
+      photo_path(:id). Każdy z tych helperów posiada odpowiadającą mu wersję url np photos_url,
+      która zwraca tę samą ścieżkę z aktualnym hostem portem i prefiksem. Jeśli trzeba stworzyć
+      ścieżki dla więcej niż jednego zasobu, można to zrobić w jednej linii. Na przykład dla ścieżek
+      photos books i videos - "resources :photos, :books, :videos". Czasami istnieją zasoby, do których
+      dostęp uzyskuje się bez podawania id. Na przykład /profile powinno zawsze pokazywać profil
+      aktualnie zalogowanego użytkownika. W tym przypadku można użyć pojedynczego zasobu wskazującego
+      na akcję show. String przekazany metodzie :to powinien mieć format controller#action. Można
+      też używać symbolu. Nalezy wtedy użyć metod action i controller. Ścieżka zasobu resource
+      :geocoder, resolve('Geocoder') { [:geocoder] } tworzy 6 rożnych ścieżek prowadzących do
+      kontrolera Geocoders. Ponieważ może istnieć potrzeba używania tego samego kontrolera dla
+      wersji pojedynczej i zbiorowej, pojedyncze zasoby mapowane są to zbiorowych kontrolerów.
+      Na przykład resources :photo i resources :photos tworzą pojedyncze i zbiorowe ścieżli prowadzące
+      do tego samego kontrolera. Pojedyncza ścieżka generuje następujące helpery: new_geocoder_path,
+      edit_geocoder_path, geocoder_path. Istnieją też ich odpowiedniki kończące się na url.
+      Może istnieć potrzeba organizowania grup kontrolerów używając przestrzeni nazw. Na przykład
+      kontrolery administracyjne można umieścić w przestrzeni Admin::. Będą przechowywane w folderze
+      app/controllers/admin i można je razem zgrupować w routerze - "namespace :admin...". Spowoduje to
+      powstanie ścieżek dla kontrolerów articles i comments, poprzedzonych słowem admin. Jeśli
+      nie ma potrzeby załączania prefixu admin, można użyć "scope module: 'admin' lub dla pojedynczego
+      przypadku resources :articles, module: 'admin'. Jeśli /admin/articles powinno wskazywać na
+      ArticlesController - scope '/admin' do lub resources: :articles, path '/admin/articles'.
+      W każdym z przypadków nazwane ścieżki pozostają takie same jak bez użycia scope. Jeśli istnieje
+      potrzeba użycia innej przestrzeni nazw kontrolera w bloku namespace, moża podać absolutną
+      ścieżkę kontrolera, np get '/foo', to: '/foo#index'. Często zdarza się że jedne zasoby należą
+      do innego zasobu. Na przykład aplikacja może zawierać relację, w której model Magazine posiada
+      wiele modeli Ad. Zagnieżdżone ścieżki pozwalają na wyrażenie tej zależności w routerze. Można
+      napisać resources :magazines do resources :ads. Spowoduje to powstanie zagnieżdżonych
+      ścieżek dla modeli Ad i Magazine. Zbyt głębokie zagnieżdżanie prowadzi do zmniejszenia
+      czytelności programu, dlatego należy stosować je w ograniczonym zakresie(maksymalnie 1 poziom).
+      Jednym ze sposobów na uniknięcie głębokiego zagnieżdżania jest wygenerowanie listy akcji
+      w przestrzeni nazw rodzica tak aby stworzyć swego rodzaju hierarchię bez zagnieżdżania metod.
+      Chodzi o zbudowanie ścieżek z minimalną ilością informacji koniecznych do identyfikacji zasobów.
+      Ta metoda równoważy podejście oparte o opis ścieżek i ich zagnieżdżanie. Istnieje dla niej
+      alternatywna składnia używająca opcji shallow: true, którą można ustawić również w zasobie
+      rodzica. Sprawi to że wszystkie zagnieżdżone zasoby będą płytkie. Metoda shallow DSL tworzy
+      przestrzeń nazw, w której każde zagnieżdżenie jest płytkie. Isnieją dwie opcje scope, dzięki
+      którym możliwa jest dostosowanie płytkich ścieżek. Opcja :shallow_path dodaje przekazany
+      parametr jako prefiks a :shallow_prefix ustawia go jako prefiks w nazwanych route helperach.
+      Routing concerny pozwalają na deklarowanie ścieżek możliwych do ponownego użycia wewnątrz innych
+      zasobów i ścieżek. Aby zdefiniować concern nalezy użyć np "concern :commentable do...".
+      Utworzone concerny mogą być później użyte w zasobach do uniknięcia powtórzeń w programie i do
+      dzielenia zachowań pomiędzy ścieżkami. Oprócz stosowania routing helperów, RoR może również
+      tworzyć ścieżki i URLe z tablic parametrów. Na przykład podczas używania magazine_ad_path,
+      można przekazać obiekty Magazine i Ad zamiast wartości ich ID. Można też użyć metody url_for
+      z listą odpowiednich obiektów a RoR automatycznie wykryje, którą ścieżkę należy utworzyć. W
+      helperze link_to zamiast pełnego wywołania url_for, wystarczy przekazać obiekt lub listę
+      obiektów. Dla innych akcji, pierwszym elementem listy powinien być symbol reprezentujący
+      odpowiednią metodę np link_to 'Edit Ad', [:edit, @magazine, @ad] . Pozwala to na
+      traktowanie obiektów modeli jako URLi, co znacząco ułatwia korzystanie ze ścieżek.
+      RoR nie ogranicza użytkownika do siedmiu domyślnych ścieżek REST. Jeżeli istnieje taka potrzeba,
+      można dodać dodatkowe ścieżki, odpowiadające pojedynczym elementom lub listom. Aby dodać
+      ścieżkę należy użyć bloku member. Spowoduje to powiązanie ścieżki /photos/1/preview z akcją
+      preview kontrolera PhotosController i odpowiednią wartością parametru params[:id]. Powstaną
+      też helpery preview_photo_url i preview_photo_path. W obrębie bloku member każda nazwa określa
+      odpowiednią metodę HTTP. Można używać metod get patch put post i delete. Jeżeli istnieje tylko
+      jedna ścieżka można wyeliminować blok pisząc np "get 'preview', on: :member". Opuszczenie opcji
+      :on spowoduje powstanie takiej samej ścieżki z tą różnicą, że id zasobó będzie dostępne jako
+      params[:photo_id] zamiast params[:id]. Route helpery będą również miały inne nazwy. Zamiast
+      preview_photo_url i preview_photo_path - photo_preview_url i photo_preview_path. Aby dodać
+      ścieżkę dla kolekcji nalezy użyć metody collect. Dzięki temu RoR rozpozna ścieżki takie jak
+      GET /photos/search i uruchomi akcję search kontrolera PhotosController. Powstaną też helpery
+      search_photos_url i search_photos_path. Tak jak w poprzednim przypadku, można też użyć opcji
+      :on. Jeżeli definiowane są dodatkowe ścieżki zasobów z symbolami jako pierwszym argumentem,
+      należy pamiętać że nie jest to równoznaczne z używaniem stringa. Symbole powodują dopasowanie
+      akcji kontrolera a stringi dopasowują ścieżki. Aby stworzyć alternatywną akcję new, można
+      zastosować opcję :on - "get 'preview', on: :new". Dzięki temu RoR rozpozna ścieżki takie jak
+      GET /comments/new/preview i dopasuje je do akcji preview kontrolera CommentsController. Powstaną
+      też helpery preview_new_comment_url i preview_new_comment_path. Jeżeli do ścieżki dodawane
+      jest zbyt wiele akcji, należy się zastanowić czy nie lepiej byłoby stworzyć nowy zasób.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      3 Non-Resourceful Routes
+      ...
+    </p>
+  </li>
+  
 </ul>
+
