@@ -106,7 +106,74 @@
   
   <li>
     <p>
-      3 Non-Resourceful Routes
+      Oprócz resource routingu, RoR posiada mechanizm routingu dowolnych URLi do akcji. Każda ze
+      ścieżek jest w tym przypadku dodawana oddzielnie do aplikacji. Zwykle resource routing jest
+      bardzo przydatny, jednak nie należy go stosować za wszelką cenę. Prosty routing sprawia, że
+      mapowanie istniejących URLi do nowych akcji aplikacji jest bardzo łatwe. Ustawianie zwykłej
+      ścieżki polega na wpisywaniu serii odpowiednich symboli. Na przykład ścieżką odpowiadającą
+      requestowi /photos/1 może być "get 'photos(/:id)', to: 'photos#display'". ID ze względu na
+      nawiasy jest tutaj parametrem opcjonalnym i jego pominięcie również przekierowałoby request
+      do akcji display PhotosController. W obrębie ścieżki można ustawić dowolną ilość segmentów a
+      ich wartości będą dostępne w zmiennej params w kontrolerze. Domyślnie dynamiczne segmenty nie
+      akceptują kropek. Jeżeli istnieje potrzeba ich użycia należy dodać ograniczenie zmieniające
+      to zachowanie. Mogą też istnieć statyczne segmenty(bez znaku dwukropka). Zmienna params będzie
+      zawierała również wszystkie wartości przekazane jako query string. W ścieżce można ustawić
+      wartości domyślne za pomocą opcji :defaults lub wykorzystać defaults jako blok. Ustawione w
+      ten sposób wartości nie mogą być nadpisane przez parametry zapytania. Nazwę ścieżki można
+      ustawić za pomocą opcji :as. Doprowadzi to do utworzenia route helperów, np dla nazwy :logout
+      logout_path i logout_url. Może być to również użyte do nadpisywania metod zdefiniowanych przez
+      zasoby. Zwykle powinno się używać metod get post put patch i delete dla ścieżki. Alternatywnie
+      można skorzystać z metody match i opcji via przyjmującej jako parametr listę dostępnych
+      zapytań. Ustawienie via: all dopasowuje wszystkie zapytania do ścieżki. Przekierowanie GET i
+      POST do tej samej akcji ma znaczenie dla bezpieczeństwa aplikacji i zwykle powinno sie tego
+      unikać. Metoda GET w RoR nie sprawdza tokenu CSRF. Z tego powodu nie należy nigdy modyfikować
+      bazy danych za pośrednictwem requestu GET. Opcja constraint pozwala na ustawienie prawidłowego
+      formatu ścieżek. Przyjmuje jako parametr wyrażenia regularne z zastrzeżeniem, że nie można
+      używać regexp anchors. Ścieżki mogą być też udostępniane na podstawie dowolnej metody na
+      obiekcie requestu zwracającej String. Request-based constraint ustawiany jest w ten sam sposób
+      co segment constraint a także istnieje możliwość użycia bloku. Request constraint działa przez
+      uruchomienie metody na obiekcie requestu z nazwą taką samą jak klucz hasha a następnie
+      porównanie zwróconej wartości z wartością hasha. Z tego powodu wartości constraintów powinny
+      odpowiadać typom wartości zwracanych z metod. Na przykład subdomain: 'api' będzie pasowało
+      do subdomeny api ale subdomain :api już nie. Istnieje wyjątek dla constrainta format. Jest to
+      metoda dla obiektu Request ale również domniemany opcjonalny parametr w każdej ze ścieżek.
+      Constrainty segmentu mają pierwszeństwo i format jest stosowany jedynie w przypadku przekazania
+      go przez hash. W przypadku "get 'foo', constraints: { format: 'json' }" format jest opcjonalny.
+      Jeżeli jednak użyje się wyrażenia "get 'foo', constraints: lambda { |req| req.format == :json }"
+      jego przekazanie będzie konieczne. Dla bardziej zaawansowanych constraintów można zastosować
+      obiekt posiadający metodę matches? lub odpowiednie wyrażenie lambda. W obu przypadkach jako
+      argument przekazywany jest obiekt request. Route globbing pozwala na dopasowanie parametru
+      do pozostałej części ścieżki. Stosuje się go przez dodanie przy nazwie parametru znaku * i
+      może wystąpić w dowolnej części adresu. Ścieżka może posiadać więcej niż 1 wildcard. Podczas
+      wysyłania requestu '/foo/bar.json' params[:pages] będzie zawierało wartość 'foo/bar' a format
+      requestu zostanie ustawiony na JSON. Aby przywrócić dawne zachowanie można ustawić parametr
+      format na wartość false lub jeżeli format ma być obowiązkowy na true. Istnieje możliwość
+      przekierowanie z jednej ścieżki do innej za pomocą helpera redirect. W trakcie przekierowania
+      przekazane mogą zostać dynamiczne parametry segmentów. Istnieje też możliwość użycia bloku z
+      parametrami jako symbolami i obiektem requestu. Domyślnie stosowanym przekierowaniem w RoR
+      jest 301 "Moved Permanently". Należy pamiętać, że niektóre przeglądarki lub serwery proxy
+      użyją w tym przypadku cache, co sprawi że stare strony staną się niedostępne. Można użyć opcji
+      :status aby zmienić status odpowiedzi, np status: 302. W każdym z przypadków, jeżeli nie zostanie
+      podany host, RoR pobierze wszystkie dane z obecnego requestu. Zamiast Stringa określającego
+      kontroler i akcję, np 'articles#index' można przekazać aplikację Rack stosowaną jako endpoint.
+      Jeżeli MyRackApp posiada metodę call i zwraca [status,header,body], router nie widzi różnicy
+      pomiędzy akcją a aplikacją Rack. Przekazywany String 'articles#index' rozszerzany jest do formy
+      ArticlesController.action(:index) zwracającej prawidłową aplikację Rack. Po przekierowaniu do
+      aplikacji Rack ścieżka pozostaje taka sama. Jeżeli ścieżka powinna być traktowana jako root,
+      można użyć funkcji mount - "mount AdminApp, at: '/admin'". Aby ustawić akcję dla ścieżki '\'
+      należy użyć metody root. Zwykle umieszcza się ją na samej górze w pliku routingu i używa jedynie
+      requestów GET. Metody root można też użyć w przestrzeniach nazw. Ścieżki mogą posiadać
+      bezpośrednio wprowadzone znaki unicode, np "get 'こんにちは', to: 'welcome#index'". Dzięki funkcji
+      direct istnieje możliwość tworzenia własnych helperów URL. Wartość zwracana z bloku musi być
+      prawidłowym parametrem metody url_for. Może to być URL, Hash, Array a także obiekt lub klasa
+      Active Model. Metoda resolve pozwala na dostosowanie polimorficznego mapowania modeli. Na
+      przykład można wygenerować pojedyncze URL "/basket" zamiast "/baskets/:id".
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      4 Customizing Resourceful Routes
       ...
     </p>
   </li>
