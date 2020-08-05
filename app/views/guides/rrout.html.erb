@@ -173,8 +173,42 @@
   
   <li>
     <p>
-      4 Customizing Resourceful Routes
-      ...
+      RoR pozwala na dostosowanie dowolnej części helperów ścieżek zasobów. Opcja controller pozwala
+      na wybór konkretnego kontrolera. Jeżeli kontroler znajduje się w przestrzeni nazw, można użyć
+      notacji jak dla folderów, np 'admin/user_permissions'. Nie należy stosować składni przestrzeni
+      nazw Ruby('Admin::UserPermissions') ponieważ może to doprowadzić do problemów z routerem i
+      błędów. Opcja constraint określa wyrażenie regularne, do którego powinien być dopasowany
+      parametr ścieżki. Można użyć jej również z blokiem zawierającym wiele ścieżek zasobów. Opcja
+      :as pozwala na nadpisanie domyślnej nazwy route helpera. Metoda path_names nadpisuje wygenerowane
+      segmenty new i edit w ścieżkach przy czym nazwy akcji pozostają takie same. Aby zastosować tę
+      zmianę do wszystkich ścieżek można użyć "scope path_names: { new: 'make' } do...". Opcja :as
+      może zostać użyta do prefiksowania nazwanych route helperów wygenerowanych przez RoR. Stosuje
+      się ją w celu uniknięcia kolizji między ścieżkami używającymi path scope. Aby prefiksować
+      grupę route helperów można użyć :as ze :scope. Scope namespace doda automatycznie prefiksy
+      :as :module i :path. Ścieżki mogą być prefiksowane nazwanymi parametrami. Aby ograniczyć
+      generowanie ścieżek można użyć opcji :only i :except. W wielu przypadkach ich stosowanie
+      skutkuje przyspieszeniem działania routera w aplikacji. Używając scope można zmienić nazwy
+      ścieżek wygenerowane przez resources. Jeżeli istnieje potrzeba zdefiniowania pojedynczej
+      wersji nazwy zasobu należy dodać nowe zasady używając Inflector. Opcja :as nadpisuje
+      wygenerowaną automatycznie nazwę zasobu w zagnieżdżonych route helperach. Opcja :param
+      nadpisuje domyślny identyfikator zasobu :id w ścieżce. Można do niego uzyskać dostęp w
+      kontrolerze używając metody params[:identifier]. Istnieje możliwość nadpisania metody
+      ActiveRecord::Base#to_param modelu w celu skonstruowania URL.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      RoR posiada funkcje pozwalające na sprawdzanie i testowanie ścieżek. Aby zobaczyć wszystkie
+      ścieżki aplikacji, należy odwiedzić adres "http://localhost:3000/rails/info/routes" w środowisku
+      development. Można też użyć polecenia "rails routes", np z opcją --expanded wyświetlającą dane
+      w postaci tabeli. Do wyszukiwania ścieżek służy opcja -g, np "rails routes -g new_comment".
+      Aby wyświetlić jedynie ścieżki prowadzące do określonego kontrolera można użyć opcji -c.
+      RoR posiada 3 metody służące do testowania ścieżek. Metoda assert_generates sprawdza czy
+      zestaw opcji generuje odpowiednią ścieżkę. Jej odwrotnością jest funkcja assert_recognizes
+      weryfikująca poprawność przekierowania ścieżki do akcji. Jako argument może zostać przekazana
+      nazwa metody HTTP, np "method: :post". Funkcja assert_routing łączy dwa poprzednie testy w
+      jeden. Sprawdza czy ścieżka generuje odpowiednie opcje i czy opcje generują prawidłową ścieżkę.
     </p>
   </li>
   
