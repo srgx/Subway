@@ -47,7 +47,81 @@
   
   <li>
     <p>
-      2 Conditions
+      Metoda where pozwala na przekazanie warunków jakie mają spełnić rekordy i odpowiada zapytaniu
+      WHERE w SQL. Warunku mogą być przekazane jako string, array lub hash. Na przykład aby znaleźć
+      klientów z odpowiednią wartością pola - Client.where("orders_count = '2'"). Należy pamiętać,
+      że przekazywanie warunków jako stringi może zmniejszyć bezpieczeństwo aplikacji. Jeżeli wartość
+      argumentu zmienia się, można użyć tablicy - Client.where("orders_count = ?", params[:orders]).
+      Pytajniki w zapytaniu zostaną zastąpione kolejnymi wartościami przekazanymi jako argumenty.
+      Lepiej unikać przekazywania zmiennych przez interpolacja i stosować metodą where z dodatkowymi
+      parametrami. Zmienne mogą być też przekazywane jako symbole i hash przechowujący ich wartości.
+      Do wyszukania elementów na podstawie equality, range i subset można zastosować hash. Na przykład
+      Client.where(locked: true). Nazwa pola może być typu string. W przypadku relacji belongs_to,
+      istnieje możliwość użycia klucza do wskazania modelu jeżeli wartością jest obiekt AR. Warunki
+      zasięgu mogą być przekazane jako hash - Time.now.midnight - 1.day)..Time.now.midnight. Odpowiada
+      to zapytaniu BETWEEN w SQL. Przekazanie tablicy z wartościami powoduje utworzenie zapytania IN.
+      Funkcja where.not odpowiada NOT a metoda or pozwala na łączenie wielu warunków.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Do pobrania rekordów w odpowiedniej kolejności służy metoda order. Można na przykład wpisać
+      Client.order(:created_at) lub Client.order("created_at"). Aby ustawić kolejność rosnąco lub
+      malejąco należy użyć Client.order(created_at: :asc) i Client.order(created_at: :desc). Można
+      też sortować w oparciu o wiele pól Client.order(orders_count: :asc, created_at: :desc) albo
+      używając stringów Client.order("orders_count ASC, created_at DESC"). Istnieje też możliwość
+      łączenia zapytań order Client.order("orders_count ASC").order("created_at DESC"). W większości
+      typów baz danych stosowanie distinct z metodami takimi jak select, pluck, ids sprawi, że order
+      wygeneruje błąd ActiveRecord::StatementInvalid chyba że użyte pola znajdowały się w liście
+      select.
+    </p>
+  </li>
+  
+  
+  <li>
+    <p>
+      Domyślnie Model.find wyszukuje wszystkie pola z setu używając select *. Aby pobrac tylko część
+      kolumn należy użyć metody select - Client.select(:viewable_by, :locked). Spowoduje to powstanie
+      modelu zawierającego jedynie wybrane pola i w przypadku próby dostępu do nieistniejących
+      atrybutów zostanie wyświetlony błąd ActiveModel::MissingAttributeError: missing attribute:
+      <attribute>. Metoda id nie powoduje jego wygenerowania dlatego należy zachować ostrożność
+      podczas operacji związanych z relacjami potrzebującymi id do poprawnego działania. Aby pobrać
+      jedynie unikalne wartości dla konkretnego pola można użyć metody distinct. Ograniczenie
+      unikalności można później usunąć - q = Client.select(:name).distinct, q.distinct(false).
+    </p>
+  </li>
+  
+  <li>
+    <p>
+       Funkcji LIMIT z SQL odpowiada metoda limit. Pozwala na ograniczenie liczby pobieranych rekordów.
+       Można ją łączyć z metodą offset pozwalającą na pomijanie rekordów Client.limit(5).offset(30).
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Metoda group to GROUP BY z SQL. Na przykład aby pobrać listę dat kiedy utworzono zamówienia
+      można napisać "Order.select("date(created_at) as ordered_date, sum(price) as total_price").
+      group("date(created_at)")". Dla każdej daty z zamówieniami zwrócony zostanie pojedynczy obiekt
+      Order. Aby uzyskać całkowitą liczbę pogrupowanych elementów należy wywołać metodą count po
+      zastosowaniu group - "Order.group(:status).count".
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      SQL używa klauzuli HAVING do określenia warunków dla pól GROUP BY. Aby dodać ją do SQL
+      utworzonego przez metodę Model.find należy użyć metody having. Na przykład można wpisać
+      "Order.select("date(created_at) as ordered_date, sum(price) as total_price").group
+      ("date(created_at)").having("sum(price) > ?", 100)". Spowoduje to zwrócenie daty i ceny
+      dla każdego obiektu Order pogrupowanych ze względu na dzień zamówienia i z ceną powyżej $100.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      8 Overriding Conditions
       ...
     </p>
   </li>
