@@ -1,3 +1,55 @@
 <h2>Active Record Interface</h2>
 
-<li></li>
+<ul>
+
+  <li>
+    <p>
+      Aby pobrać obiekt z bazy danych, można użyć jednej z wielu metod wyszukujących. Każdy finder
+      pozwala na przekazanie argumentu zawierającego zapytanie do bazy danych bez ręcznego tworzenia
+      zapytań SQL. Metody finderów zwracające kolekcję zwracają obiekt klasy Relation. Metody
+      zwracające jeden element, zwracają pojedynczy obiekt modelu. Podstawowa operacja wyszukiwania
+      Mode.find(options) konwertuje przekazane opcje do postaci SQL, uruchamia zapytanie i pobiera
+      dane z bazy, tworzy odpowiedni obiekt Ruby zawierający dane oraz uruchamia callbacki after_find
+      i after_initialize jeśli zostały wcześniej ustawione. Metoda find pozwala na wyszukanie obiektu
+      na podstawie id. Odpowiada zapytaniu "...WHERE id = X LIMIT 1". Metodzie można też przekazać
+      tablicę wartości id. Metoda take pobiera obiekt bez uwzględniania kolejności i można jej
+      przekazać liczbę obiektów. Funkcja first pobiera pierwszy obiekt z bazy domyślnie w kolejności
+      id. Jeżeli default scope posiada ustawioną metodę porządkującą, first weźmie ją pod uwagę.
+      Przekazanie liczby całkowitej spowoduje pobranie kilku pierwszych rekordów. Można też użyć
+      first razem z order w celu pobrania pierwszego rekordu ze względu na jakiś atrybut. Metoda
+      last to ostatni rekord i również można jej przekazać liczbę rekordów. Metoda find_by pozwala
+      na określenie warunków dopasowania, np "Client.find_by first_name: 'Lifo'". Często zdarza się,
+      że istnieje konieczność iterowania po wielu rekordach, na w trakcie wysyłania newslettera wielu
+      użytkownikom lub podczas eksportowania danych. Zwykłe podejśćie ("User.all.each") staje się
+      jednak niepraktyczne jeśli rozmiar tabeli jest zbyt duży. AR jest zmuszony do pobrania całej
+      tabeli, zbudowania obiektów modeli dla każdego wiersza i przechowywania wszystkich danych w
+      pamięci. Dla wielu rekordów takie zachowanie może przekroczyć ilość dostępnej pamięci. RoR
+      posiada 2 metody pozwalające na ominięcie tego problemu przez podzielenie rekordów na mniejsze
+      porcje. Pierwsza metoda, find_each pobiera porcję rekordów a następnie przekazuje każdy rekord
+      oddzielnie do bloku jako model. Druga metoda find_in_batches pobiera porcję rekordów i wysyła
+      ją do bloku jako tablicę modeli. Obie metody stosuje się do przetwarzania dużej ilości rekordów,
+      które normalnie nie zmieściłyby się w pamięci jednocześnie. Jeżeli trzeba jedynie przejść w pętli
+      przez tysiące rekordów, zwykłe metody find są lepszym rozwiązaniem. Metoda find_each pobiera
+      rekordy w porcjach i przekazuje je do bloku pojedynczo. Działa na klasach modelu i na relacjach.
+      Jeżeli istnieje porządek w receiverze, zachowanie metody zależy od flagi error_on_ignored_order.
+      Dla wartości true generowany jest błąd ArgumentError. W przeciwnym wypadku kolejność rekordów
+      jest ignorowana i wyświetlone zostaje ostrzeżenie. Zachowanie to można nadpisać używając opcji
+      :error_on_ignore. Metoda find_each posiada różne opcje. Opcja batch_size określa liczbę rekordów
+      w jednej porcji danych. Opcja :start pozwala na ustawienie początkowego id rekordu a :finish
+      ostatniego. Można ich użyć razem określając zakres rekordów. Opcja :error_on_ignore nadpisuje
+      konfigurację aplikacji, kontrolując czy należy wygenerować błąd w przypadku uporządkowanej
+      relacji. Metodą podobną do find_each jest find_in_batches. Różnica polega na tym, że do bloku
+      przekazywane są całe tablice modeli. Metoda zadziała w przypadku relacji, o ile nie mają
+      ustawionej kolejności i posiada takie same opcje jak find_each.
+    </p>
+  </li>
+  
+  
+  <li>
+    <p>
+      2 Conditions
+      ...
+    </p>
+  </li>
+  
+</ul>
