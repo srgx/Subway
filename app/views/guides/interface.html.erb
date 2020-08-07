@@ -121,7 +121,110 @@
   
   <li>
     <p>
-      8 Overriding Conditions
+      Przekazane wcześniej warunki mogą zostać usunięte dzięki metodzie unscope. Możliwe jest
+      też usunięcie konkretnej klauzuli where. Warunki mogą być nadpisane z użyciem metody only.
+      Funkcja reselect pozwala na zmodyfikowanie zapytania select, reorder zmienia kolejność
+      rekordów a reverse_order ją odwraca. Metoda rewhere nadpisuje poprzednią klauzulę where.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Metoda none zwraca relację bez rekordów. Kolejne zapytania dołączane do relacji wygenerują
+      kolejne puste relacje. Jest to przydatne w sytuacjach gdy metoda musi wygenerować poprawny
+      obiekt relacji.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Metoda readonly relacji blokuje możliwość modyfikacji wszystkich zwróconych obiektów. Próba
+      edycji obiektu spowoduje wygenerowanie błędu ActiveRecord::ReadOnlyRecord.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      AR posiada 2 mechanizmy lockingu - optimistic locking i pessimistic locking. Optimistic locking
+      pozwala wielu użytkownikom na dostęp do tego samego rekordu i zakłada minimalne konflikty danych.
+      Sprawdza, czy inny proces dokonał zmian w obiekcie od czasu gdy został odczytany. Jeśli miało
+      to miejsce wygenerowany zostaje błąd ActiveRecord::StaleObjectError a zmiany są anulowane.
+      Aby używać optimistic locking tabela powinna mieć kolumnę o nazwie lock_version typu integer.
+      Za każdym razem kiedy rekord jest updatowany zwiększana jest wartość kolumny lock_version.
+      Jeżeli update request posiada wartość niższą niż aktualna lock_version zostanie wyświetlony błąd
+      ActiveRecord::StaleObjectError. Użytkownik jest odpowiedzialny za poradzenie sobie z konfliktem
+      przez przechwycenie wyjątku, rollbackowanie, mergowanie lub inną logikę programu. To zachowanie
+      może być wyłączone przez ustawienie ActiveRecord::Base.lock_optimistically = false. Aby nadpisać
+      nazwę kolumny lock_version można skorzystać z atrybutu klasy ActiveRecord::Base o nazwie
+      locking_column - self.locking_column = :lock_client_column. Pessimistic locking korzysta z
+      mechanizmu zapewnianego przez bazę danych. Stosowanie lock podczas budowania relacji powoduje
+      uzyskanie blokady na wybranych wierszach. Relacje używające lock działają zwykle w obrębie
+      transakcji co chroni przed deadlockami. Metodzie lock można przekazać program SQL co pozwala
+      na wybranie różnych typów locków. Na przykład SQL posiada wyrażenie LOCK IN SHARE MODE, dzięki
+      któremu można zablokować rekord i jednocześnie pozwolić na jego odczytywanie przez pozostałe
+      zapytania. Wystarczy przekazać odpowiedniego stringa jako parametr. Jeżeli istnieje już obiekt
+      modelu, możliwe jest jednoczesne rozpoczęcie transakcji i ustawienie locka. Można to zrobić
+      korzystając z bloku - "item.with_lock do...".
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Active Record posiada 2 metody służące do obsługi klauzul JOIN. Są to joins i left_outer_joins.
+      Metoda joins powinna być używana jako INNER JOIN lub własne zapytania a left_outer_joins jako
+      LEFT OUTER JOIN. Metody joins można używać na wiele sposobów, na przykład przekazując string
+      z zapytaniem. AR pozwala na używanie nazw asocjacji zdefiniowanych w modelu jako skrót w
+      klauzulach JOIN w trakcie używania metody join. Można na przykład napisać "Category.joins
+      (:articles)" co spowoduje zwrócenie obiektu kategorii dla wszystkich kategorii z artykułami.
+      Jeżeli więcej niż jeden artykuł posiada tę samą kategorię, na liście mogą się pojawić duplikaty.
+      Aby tego uniknąć należy użyć metody distinct. Funkcji joins można przekazać wiele relacji,
+      na przykład "Article.joins(:category, :comments)". Możliwe jest też przekazanie zagnieżdżonych
+      relacji - "Article.joins(comments: :guest)" lub "Category.joins(articles: [{ comments: :guest },
+      :tags])". Połączonym tabelom można przekazać warunku w obiektach Array lub String. Aby sprawdzić
+      czy rekordy posiadają powiązane obiekty, można użyć metody left_outer_joins.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Eager loading pozwala na ograniczenie ilości wykonywanych zapytań. Aby go zastosować należy
+      użyć metody includes. Dzięki temu, na przykład zamiast 11 zapytań możliwe jest wykonanie tylko
+      dwóch. Funkcja include może przyjmować jako argument wiele asocjacji lub zawierające je
+      zagnieżdżone hashe. Również w tym przypadku istnieje możliwość dodawania warunków zapytania.
+      Jeżeli asocjacja jest egaer loaded jako część join, wszystkie pola z własnej klauzili select
+      nie będą obecne w załadowanych modelach. Spowodowane jest to niejednoznacznością tego czy
+      powinny znajdować się w obiekcie rodzica czy dziecka.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Scoping pozwala na stosowanie często używanych zapytań jako metod na modelach lub obiektach
+      asocjacji. Wszystkie metody scopów powinny zwracać ActiveRecord::Relation lub nil. Aby stworzyć
+      prosty scope należy użyć metody scope w klasie, np "scope :published, -> { where(published:
+      true) }". Utworzoną funkcję można później użyć na klasie lub asocjacji. Scope może przyjmować
+      argumenty, na przykład czas. Stosowanie metod klas jest zalecanym sposobem przekazywania
+      argumentów. Funkcje te będą dostępne również w obiektach asocjacji. Scopy mogą stosować
+      warunki przy czym należy pamiętać, że zawsze, nawet w przypadku ich niespełnienia, zwracają
+      obiekt Relation. Błędne stosowanie tej cechy może doprowadzić do błędów NoMethodError.
+      Jeżeli scope powinien odnosić się do wszystkich zapytań w modelu, można zastosować metodę
+      default_scope. Dla bardziej skomplikowanych zachowań możliwe jest utworzenie metody klasy
+      self.default_scope. Należy pamiętać, że podczas przekazywania parametrów w formacie Array
+      argumenty default_scope nie mogą być skonwertowane na Hash w normalnych przypisaniach
+      atrybutów. Scopy mogą być mergowane z użyciem warunku AND. Można łączyć i dopasowywać warunki
+      scope i where a finalne zapytanie SQL będzie zawierało je wszystkie. Jeżeli ostatnie where
+      nie powinno mieć decydującego znaczenia, można użyć Relation#merge. Klauzula default_scope
+      zostanie dołączona do warunków scope i where. Aby usunąć scoping można użyć metody unscoped.
+      Jest to szczególnie przydatne w przypadku gdy zdefiniowano default_scope w modelu jednak nie
+      powinno się go stosować w konkretnym zapytaniu - "Client.unscoped.load". Metoda usunie cały
+      scoping i spowoduje wykonanie normalnego zapytania w tabeli. Funkcja unscoped może jako
+      argument przyjmować również blok.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      15 Dynamic Finders
       ...
     </p>
   </li>
