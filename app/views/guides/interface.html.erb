@@ -224,8 +224,83 @@
   
   <li>
     <p>
-      15 Dynamic Finders
-      ...
+      Active Record tworzy metodę findera dla wszystkich pól w tabeli. Na przykład jeśli istnieje
+      pole first_name powstanie metoda find_by_first_name. Findery ze sobą łączyć, na przykład
+      "Client.find_by_first_name_and_locked("Ryan", true)".
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Makro enum mapuje pole integer do zbioru określonych wartości. Na przykład dla dostępnych i
+      niedostępnych rekordów "enum availability: [:available, :unavailable]" - "Book.available",
+      "Book.where(availability: :available)" itp.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Active Record pozwala na łączenie metod zapytań. Powoduje to wygenerowanie pojedynczego
+      zapytania SQL, na przykład Person.select(...).joins(...).where(...). Jeżeli zapytanie pasuje
+      do kilku rekordów, find_by pobierze tylko jeden.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Metoda find_or_create pozwala na odnalezienie obiektu lub utworzenie go jeśli nie istnieje.
+      To czy zostanie utworzony zależy od metod sprawdzających jego poprawność. Metody można używać
+      razem z metodą create_with lub blokiem. Funkcja find_or_create_by! powoduje wygenerowanie
+      błędu w przypadku niepowodzenia walidacji. Metoda find_or_initialize_by działa tak jak
+      find_or_create_by z tym, że zamiast tworzenia obiektu z użyciem create, wykorzystuje funkcję
+      new.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Aby samodzielnie napisać zapytania SQL można użyć metody find_by_sql. Zwraca ona tablicę wyników
+      nawet jeżeli znaleziony został tylko jeden obiekt. W podobny sposób działa metoda select_all z
+      tą różnicą, że ze znalezionych rekordów nie zostaną utworzone obiekty. Zwrócony będzie jeden
+      obiekt ActiveRecord::Result. Metoda pluck służy to zapytań na jednej lub wieku kolumnach tabeli
+      modelu. Przyjmuje jako argument listę nazw kolumn i zwraca tablicę odpowiednich wartości. Metoda
+      konwertuje wynik z bazy danych do obiektu Array bez tworzenia obiektów ActiveRecord. Może to
+      oznaczać lepszą wydajność dla dużego i często wykonywanego zapytania. Nie ma ograniczenia co do
+      ilości przekazywanych tabel. W przeciwieństwie do select, pluck uruchamia pośrednie zapytania i
+      z tego powodu nie może być łączona z kolejnymi scopami chociaż może korzystać z tych, które
+      zostały utworzone wcześniej. Metoda ids może być użyta do pluckowania wszystkich ID relacji
+      z użyciem klucza głównego tabeli.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Jeśli istnieje potrzeba sprawdzenia czy obiekt istnieje, można zastosować metodę exists?.
+      Wykonuje takie samo zapytanie jak find, jednak zamiast obiektu, zwraca wartości true lub false.
+      Można jej przekazać wiele wartości - "Client.exists?(name: ['John', 'Sergei'])" a także
+      wywołać bez parametrów "Client.where(first_name: 'Ryan').exists?" lub "Client.exists?".
+      Aby sprawdzić czy model lub relacja istnieją można użyć metod any? i many?.
+    </p>
+  </li>
+  
+  <li> 21 21 21 21 21
+    <p>
+      Wszystkie metody kalkulujące działają bezpośrednio na modelu lub relacji. Można je poprzedzić
+      innymi finderami lub relacjami. Aby sprawdzić liczbę rekordów w tabeli można użyć metody count.
+      Jeżeli zliczane mają być tylko obiekty posiadające określone pole, należy przekazać jego nazwę
+      jako argument funkcji - "Client.count(:age)". Metoda average liczy średnią dla określonej
+      tabeli, minimum znajduje wartość minimalną a maximum maksymalną. Do obliczania sum pola tabeli
+      służy metoda sum.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Na zapytaniach triggerowanych przez relacje można użyć EXPLAIN. Active Record wykonuje pretty
+      printing emulujący zachowanie odpowadającej powłoki bazy danych. Eager loading może striggerować
+      więcej niż jedno zapytania a niektóre zapytania mogą potrzebować rezultatów poprzednich. Ze
+      względu na to, explain wykonuje zapytanie, po czym czeka na kolejne informacje. Więcej informacji
+      na temat EXPLAIN można znaleźć w źródłach związanych z konkretnymi bazami danych.
     </p>
   </li>
   
