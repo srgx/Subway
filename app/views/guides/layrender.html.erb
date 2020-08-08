@@ -57,9 +57,55 @@
       layoutu innego niż aktualny lub jego całkowite wyłączenie, :location ustawia header Location a
       :status zmienia kod statusu HTTP. W ostatnim przypadku można użyć wartości numerycznej lub
       symbolu, np 305 lub :use_proxy. Jeżeli nastąpi próba wygenerowania zawartości dla statusu
-      niezapewniającego takiej możliwości, zostanie ona porzucona.
+      niezapewniającego takiej możliwości, zostanie ona porzucona. RoR używa formatu ustawionego
+      przez request lub domyślnie :html. Można to zmienić opcją :formats z symbolem lub tablicą
+      symboli. Aby wyszukać wariacje szablonu w tym samym formacie, można wymienić liste wariantów
+      przekazując je opcji :variants. Wariant może też zostać ustawiony w obiekcie requestu w akcji
+      kontrolera. RoR do wyszukania layoutu korzysta ze specjalnego algorytmu opartego o hierarchię
+      plików. Layout można ustawić w kontrolerze korzystając z metody layout. Aby zrobić to dla
+      wszystkich kontrolerów nalezy użyć klasy ApplicationController. Stosując symbol można opóźnić
+      wybór layoutu i podjąć decyzję dopiero w kontrolerze. Istnieje też możliwość skorzystania z
+      obiektu Proc. Layouty warunkowe pozwalają na wybranie konkretnych akcji, dla których mają być
+      użyte. Layouty zadeklarowane niżej w hierarchi nadpisują te, które pochodzą z wyższych klas.
+      W podobny sposób działa hierarchia szablonów. Metoda render powinna być wywoływana w akcji
+      maksymalnie 1 raz. Do przekierowań służą metody redirect_to i redirect_back. Należy pamiętać,
+      że nie powodują one zatrzymania akcji a jedynie ustawienie odpowiedzi HTTP. Aby przerwać
+      działanie funkcji konieczne jest użycie return lub innego mechanizmu haltującego. Opcja
+      status pozwala na zmianę kodu statusu HTTP. Metoda head może być użyta do wysłania przeglądarce
+      odpowiedzi składającej się jedynie z nagłówków. Przekazany argument jest interpretowany jako
+      hash z nazwami headerów i ich wartościami.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Budując odpowiedź, RoR łączy widok z aktualnym layoutem stosując wymienione wcześniej zasady.
+      W obrębie layoutu istnieją 3 narzędzia pozwalające na komponowanie różnych części outputu w taki
+      sposób, aby utworzyć pożądaną całość. Asset tag helpery pozwalają na generowanie HTML z linkami
+      do feedów JavaScriptu, arkuszy stylów, obrazów, filmów i dźwięków. Można ich używać w layoutach
+      lub w innych widokach chociaż auto_discovery_link_tag, javascript_include_tag a także stylesheet_
+      link_tag zwykle umieszczane są w sekcji <head> layoutu. Asset tag helpery nie sprawdzają czy
+      wskazywany asset istnieje w przekazanej lokalizacji. Ich jedynym zadaniem jest wygenerowanie
+      odpowiedniego linku. Helper auto_discovery_link_tag buduje HTML, który może być użyty przez
+      większość przeglądarek i feed readerów do wykrycia feedów RSS, Atom lub JSON. Jako parametry
+      przyjmuje typ linku(:rss, :atom, :json), hash z opcjami przekazanymi do url_for i hash z opcjami
+      tagu. Opcja :rel ustawia wartość rel w linku, :type to typ MIME a :title to tytuł linku. Aby
+      wygenerować link tagu <script> należy użyć javascript_include_tag. Jeżeli RoR używany jest z
+      włączonym asset pipeline, będzie to link prowadzący do /assets/javascripts. Plik js w obrębie
+      aplikacji RoR znajduje się w jednej z 3 lokalizacji app/assets, lib/assets lub vendor/assets.
+      Helperowi można też przekazać absolutną ścieżkę pliku lub URL. Jednocześnie można dołączyć
+      kilka plików. Linkowanie plików CSS odbywa się za pośrednictwem helpera stylesheet_link_tag.
+      Pliki znajdują się w folderach /assets/stylesheets, app/assets, lib/assets lub vendor/assets.
+      Tutaj również można przekazać absolutną lub względną ścieżkę do plików. Domyślnie linki są
+      generowane z ustawieniami media="screen" rel="stylesheet". Można to zmienić za pomocą opcji
+      :media i :rel. Do tworzenia linków z obrazami i filmami służą odpowiednio image_tag i
+      video_tag. Domyślnie pliki wczytywane są z folderów public/images i public/videos. Tag video
+      obsługuje wszystkie opcje znacznika <video>: :poster, :autoplay, :loop, :controls, :autobuffer.
+      Używając tablicy można jednocześnie można przekazać wiele nazw plików filmowych. Pliki dźwiękowe
+      obsługuje audio_tag a ich domyślnym folderem jest public/audios. Dostępne opcje to :autoplay,
+      :controls i :autobuffer.
       
-      2.2.12.5 The :formats Option
+      3.2 Understanding yield
       ...
     </p>
   </li>
