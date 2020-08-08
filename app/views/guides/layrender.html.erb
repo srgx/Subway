@@ -1,8 +1,67 @@
 <h2>Layouts and Rendering</h2>
 
 <ul>
+
   <li>
     <p>
+      Przewodnik opisuje interakcje pomiędzy kontrolerem a widokiem w trójkącie MVC. Kontroler jest
+      odpowiedzialny za zarządzanie całym procesem przetwarzania requestu, chociaż zwykle najbardziej
+      skomplikowana logika znajduje się w modelu. Jeśli konieczne jest wysłanie odpowiedzi do
+      użytkownika, sterowanie przekazywane jest widokowi. Przewodnik porusza takie tematy jak
+      decydowanie co powinno zostać wysłane jako odpowiedź i która metoda powinna zostać użyta do jej
+      utworzenia. Jeżeli odpowiedź to pełny widok, RoR wykonuje dodatkową pracę stosując layouty i
+      widoki częściowe. Wszystkie te możliwości zostaną pokazane w dalszej części przewodnika.  
     </p>
   </li>
+  
+  <li>
+    <p>
+      Z perspektywy kontrolera istnieją trzy sposoby, na które można stworzyć odpowiedź HTTP.
+      Metoda render tworzy pełną odpowiedź i zwraca ją do przeglądarki, redirect_to wysyła przeglądarce
+      kod przekierowania a head generuje odpowiedź składającą się jedynie z headerów HTTP wysyłanych
+      do przeglądarki. Domyślnie RoR generuje widoki z nazwami odpowiadającymi odpowiednim ścieżkom.
+      Na przykład widok app/views/books/index.html.erb zostanie wygenerowany dla ścieżki /books jeśli
+      istnieje kontroler Books i zasób resources :books. Aby przekazać wartość do widoku wystarczy
+      przypisać ją do zmiennej - "@books = Book.all" a później wyświetlić używając np "@books.each".
+      Właściwe renderowanie wykonywane jest przez zagnieżdżone klasy modułu Action View o nazwie
+      ActionView::Template::Handlers. Przewodnik nie opisuje w szczegółach tego procesu ale ważne jest
+      aby wiedzieć, że rozszerzenie pliku widoku kontroluje wybór handlera szablonów. W większości
+      przypadków najważniejszą pracę podczas renderowania zawartości aplikacji wykonuje metoda render.
+      Można ją dostosowywać na różne sposoby, renderować tekst, JSON lub XML. Aby przetestować
+      jej output można użyć metody render_to_string zwracającej stringa zamiast odpowiedzi do
+      przeglądarki. Aby w tym samym kontrolerze wyrenderować widok odpowiadający innemu szablonowi
+      można użyć metody render z nazwą tego szablonu(string lub symbol). Można też przekazać metodzie
+      ścieżkę do widoku z innego kontrolera np "render "products/show"". Istnieje też alternatywny
+      sposób wymagany w RoR 2.2 i wcześniejszych - "render template: "products/show"". Wszystkie
+      pokazane metody sprowadzają się do jednego i należy używać tej, która w konkretnym przypadku
+      jest najprostsza. Metoda render może obejść się całkiem bez widoku jeżeli zastosuje się ją z
+      opcją :inline i przekaże ERB jako argument. Zwykle nie powinno się postępować w ten sposób
+      ponieważ nie odpowiada to zasadom MVC i może sprawić że aplikacja stanie się zbyt skomplikowana.
+      Domyślnie :inline renderuje ERB ale można to zmienić za pomocą opcji :type. Aby wyrenderować
+      zwykły tekst należy zastosować metodę render z opcją :plain. Zwykle przydaje się to podczas
+      generowania odpowiedzi Ajax lub usług sieciowych oczekujących czegoś innego niż poprawny HTML.
+      Domyślnie :plain renderuje tekst bez użycia obecnego layoutu. Aby to zmienić należy ustawić
+      wartość opcji :layout na true i użyć rozszerzenie .text.erb w pliku layoutu. Aby przesłać
+      przeglądarce string HTML należy użyć opcji render :html. Jest to przydatne podczas renderowania
+      małych fragmentów HTML. Jeżeli markup jest skomplikowany lepiej umieścić go w pliku szablonu.
+      Podczas stosowania opcji :html entities będą escapowane jeżeli string nie został utworzony
+      z html_safe APIs. Do renderowania JSON służy opcja :json i nie ma potrzeby wywoływania metody
+      to_json na renderowanym obiekcie. Funkcja render wywoła ją automatycznie. Podobnie działa opcja
+      :xml. RoR może generować zwykły JavaScript dzięki opcji :js. Do przesłania zwykłej zawartości
+      służy opcja :raw. Treść będzie w tym przypadku typu text/plain i jest to domyślne ustawienie dla
+      odpowiedzi Action Dispatch. RoR może renderować pliki z absolutnej ścieżki. Jest to przydatne
+      na przykład podczas generowania statycznych wiadomosci błędów. Domyślnie renderowanie przebiega
+      z aktualnym layoutem. Stosowanie opcji :file z inputem usera może zmniejszyć bezpieczeństwo
+      aplikacji. Jeżeli layout nie jest wymagany, lepiej użyć metody send_file. Wywołania render
+      akceptują 6 opcji. Opcja :content_type ustawia typ zawartośi, :layout pozwala na wybranie
+      layoutu innego niż aktualny lub jego całkowite wyłączenie, :location ustawia header Location a
+      :status zmienia kod statusu HTTP. W ostatnim przypadku można użyć wartości numerycznej lub
+      symbolu, np 305 lub :use_proxy. Jeżeli nastąpi próba wygenerowania zawartości dla statusu
+      niezapewniającego takiej możliwości, zostanie ona porzucona.
+      
+      2.2.12.5 The :formats Option
+      ...
+    </p>
+  </li>
+
 </ul>
