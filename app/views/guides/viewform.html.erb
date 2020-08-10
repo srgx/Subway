@@ -1,8 +1,54 @@
 <h2>Action View Form Helpers</h2>
 
 <ul>
+
   <li>
     <p>
+      Główny form helper to funkcja form_with bez argumentów. Wygenerowany formularz posiada ukryte
+      pole i authenticity_token. Przy pomocy tej funkcji i tag helperów można utworzyć prosty formularz
+      wyszukiwania. Popularne helpery to między innymi checkboxy, radio buttony, pola tekstowe,
+      pola z hasłami, kolorami, datami itp.
     </p>
   </li>
+  
+  <li>
+    <p>
+      Istnieją też helpery tworzące formularze dla modeli - "text_field(:person, :name)". Można też
+      zbindować formularz i model używając metody form_with :model. W podobny sposób można użyć
+      metody fields_for, na przykład dla powiązanych modeli. Funkcja form_with jest w stanie
+      wygenerować formularz na podstawie dostarczonego obiektu. Ścieżki z przestrzeni nazw mogą
+      być obsługiwane dzięki przekazaniu opcji :model odpowiednich wartości. Specjalne requesty są
+      emulowane dzięki ukrytemu polu _method.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Dzięki helperom można w łatwy sposób tworzyć select boxy. Wystarczy użyć funkcji select_tag.
+      Opcje mogą posiadać dowolne atrybuty, których wartości przekazywane są jako hashe. Select boxy
+      działają również z modelami. Użytecznymi helperami są options_from_collection_for_select
+      generujący opcje na podstawie listy obiektów i collection_select tworzący odpowiedniego select
+      boxa. Helper time_zone_select pozwala użytkownikowi na wybranie strefy czasowej.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Helpery select pozwalają na wygenerowanie tagów związanych z wyborem daty. Podobnym helperem
+      przeznaczonym do pracy z modelami jest date_select. Opcje :start_year i :end_year ustawiają
+      zakres dostępnych dat. Metoda select_date powinna być stosowana jeśli generowane treści nie
+      mają związku z modelami. Do wyświetlania pojedynczych wartości służą metody takie jak select_day,
+      select_hour, select_year itp.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      5 Uploading Files
+      ...
+    </p>
+  </li>
+  
+  
+  
 </ul>
