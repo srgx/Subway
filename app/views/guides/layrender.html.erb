@@ -103,10 +103,32 @@
       obsługuje wszystkie opcje znacznika <video>: :poster, :autoplay, :loop, :controls, :autobuffer.
       Używając tablicy można jednocześnie można przekazać wiele nazw plików filmowych. Pliki dźwiękowe
       obsługuje audio_tag a ich domyślnym folderem jest public/audios. Dostępne opcje to :autoplay,
-      :controls i :autobuffer.
-      
-      3.2 Understanding yield
-      ...
+      :controls i :autobuffer. W kontekście layoutu yield oznacza sekcję, w której należy umieścić
+      zawartość widoku. Najprościej jest skorzystać z jednego wywołania yield dla całej treści strony.
+      Możliwe jest też korzystanie z yield w różnych regionach layoutu poprzez przekazanie metodzie
+      odpowiedniego parametru. Służy do tego metoda content_for wskazująca, która część pliku powinna
+      być wygenerowana w miejscu yield z określoną nazwą. Funkcja content_for jest przydatna jeżeli
+      layout posiada różne sekcje, sidebary lub footery zawierające własną treść lub pliki JS i CSS.
+      Partiale służą do umieszczania różnych części odpowiedzi we własnych plikach. Aby ich użyć
+      należy przekazać metodzie render parametr określający nazwę widoku bez początkowego podkreślenia.
+      Częściowe widoki mogą być traktowane jako funkcje pozwalające na lepszą organizację aplikacji.
+      Partiale podobnie jak widoki mogą posiadać własne pliki layoutu. Aby skorzystać z tej możliwości
+      należy przekazać jawnie nazwę partiala i layoutu metodzie render. Partialom można przekazywać
+      loknalne zmienne - "render partial: "form", locals: {zone: @zone}". Aby przekazać zmienne tylko
+      w określonych przypadkach należy użyć metody local_assigns. Każdy z partiali posiada zmienną
+      z nazwą taką samą jak jego nazwa. Aby ustawić jej wartość należy użyć opcji :object. Metodzie
+      render można też przekazać obiekt, dla którego wygenerowany zostanie odpowiedni widok. Potrafi
+      ona również generować widoki dla kolekcji obiektów przekazanych w parametrze :collection lub
+      z użyciem skrótu, np "render @products". RoR wygeneruje odpowiednie widoki nawet jeżeli obiekty
+      z listy są różnych typów. W przypadku pustej listy metoda render zwraca wartość nil. Zmienne
+      lokalne o własnych nazwach można deklarować dzięki opcji :as. Opcja :locals pozwala na użycie
+      w partialu dowolnej liczby własnych zmiennych. Partiale korzystające z kolekcji posiadają
+      zmienną _counter informującą ile razy wyrenderowano obiekt w obrębie widoku. Można też wskazać
+      drugi partial renderowany pomiędzy głównymi partialami. Służy do tego opcja :spacer_template.
+      Opcji layout można używać również podczas renderowania kolekcji. Może się zdarzyć, że aplikacja
+      potrzebuje w jednym z kontrolerów nieznacznie zmodyfikowanego layoutu. W tym przypadku można
+      skorzystać z zagnieżdżonych layoutów. W nowym pliku renderowany jest oryginalny widok oraz
+      wprowadzane są konieczne zmiany.
     </p>
   </li>
 
