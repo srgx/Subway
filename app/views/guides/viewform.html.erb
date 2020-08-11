@@ -44,8 +44,57 @@
   
   <li>
     <p>
-      5 Uploading Files
-      ...
+      Podczas uploadowania plików atrybut enctype musi być ustawiony na wartość "multipart/form-data".
+      Użycie form_with z parametrem model sprawia, że jest to ustawiane automatycznie. W przeciwnym
+      razie należy odpowiednią opcję wybrać samodzielnie. RoR posiada helpery związane z uploadem
+      plików. Są to file_field_tag i file_field. W późniejszych operacjach na uploadowanych plikach
+      pomocne jest Active Storage.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Możliwe jest tworzenie własnych Form Builderów dziedziczących po klasie FormBuilder. Mogą one
+      zawierać własne metody helperów np text_field. W przypadku częstego korzystania z buildera
+      dobrze jest stworzyć funkcję wykonującą automatycznie potrzebne działania. Z builderów można
+      korzystać również podczas wywołań metody render.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Struktura hasha z parametrami odpowiada nazwom zmiennych używanych w tagach. Możliwe jest ich
+      dowolne zagnieżdżanie. RoR zwykle ignoruje zduplikowane nazwy parametrów. Aby to zmienić należy
+      na końcu nazwy pola dodać parę nawiasów kwadratowych. Spowoduje to umieszczenie wartośći z pól
+      w jednej tablicy. Wymienione cechy można łączyć tworząc na przykład tablicę hashów. Nie powinno
+      stosować się parametrów tablicowych w połączeniu z helperem check_box. Do generowania formularzy
+      służą metody form_with i fields_for oraz opcja :index.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Form helpery pozwalają na wysyłanie danych do zewnętrznych zasobów. W tym przypadku może być
+      konieczne ustawienie wartości authenticity_token helperowi form_with. Jeżeli nie należy tego
+      robić powinna zostać wybrana opcja false.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Podczas budowania skomplikowanych formularzy przydatna może sie okazać metoda Active Record
+      accept_nested_attributes_for. Pozwala ona na tworzenie aktualizowanie i usuwanie odpowiednich
+      wartości. Przed modyfikowaniem pól należy zadeklarować parametry jako dozwolone. Opcja
+      :allow_destroy pozwala na usuwanie powiązanych obiektów a :reject_if ignoruje pola, które nie
+      zostały wypełnione przez użytkownika. RoR nie posiada helperów pozwalających na dynamiczne
+      dodawanie pól formularza.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Funkcje form_tag i form_for zostały zastąpione przez form_with i są uznawane za przestarzałe.
+      Informacje na ich temat można znaleźć w poprzednych wersjach przewodnika.
     </p>
   </li>
   
