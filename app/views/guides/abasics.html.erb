@@ -1,8 +1,28 @@
 <h2>Active Model Basics</h2>
 
 <ul>
+
   <li>
     <p>
+      Active Model to biblioteka zawierająca różne moduły używane do tworzenia klas potrzebujących
+      niektórych funkcjonalności Active Record. Moduł AttributeMethods pozwala na dodawanie własnych
+      prefiksów i sufiksów do metod klas. Callbacks umożliwia tworzenie callbacków w stylu Active
+      Record. Jeżeli klasa posiada metody id i persisted? można w niej użyć modułu Conversion, który
+      pozwala na konwertowanie obiektów do innego typu. Obiekt staje się brudny jeżeli jego atrybuty
+      zostały zmodyfikowane ale nie zapisane. Moduł Dirty dostarcza metody pozwalające na sprawdzenie
+      czy taka sytuacja ma miejsce. Moduł Validations dodaje możliwość walidacji obiektów a Naming
+      zawiera funkcje przeznaczone do operacji na nazwach i ścieżkach. ActiveModel::Model umożliwia
+      klasie łatwą współpracę z Action Pack i Action View. ActiveModel::Serialization podobnie jak
+      ActiveModel::Serializers::JSON to funkcje związane z serializacją obiektu. Moduł integrujący
+      obiekt z frameworkiem i18n to ActiveModel::Translation. Metoda human_attribute_name przekształca
+      nazwy atrybutów do postaci bardziej zrozumiałej dla człowieka. Odpowiednie definicje znajdują
+      w plikach w folderze locales. ActiveModel::Lint::Tests pozwala na sprawdzenie, czy obiekt jest
+      zgodny z Active Model API. ActiveModel::SecurePassword umożliwia przechowywanie dowolnego
+      hasła w bezpiecznej zaszyfrowanej formie. Aby moduł działał poprawnie konieczne jest użycie w
+      aplikacji gema bcrypt. Model powinien mieć metodę akcesora XXX_digest gdzie XXX jest nazwą
+      atrybutu hasła. Automatycznie ustawiane są walidacje sprawdzające obecność hasła, jego
+      potwierdzenie oraz maksymalną długość wynoszącą 72 znaki.
     </p>
   </li>
+  
 </ul>
