@@ -1,8 +1,68 @@
 <h2>Action View Overview</h2>
 
 <ul>
+
+  <li>
+    <p>
+      W RoR requesty są obsługiwane przez Action Controller i Action View. AC komunikuje się z bazą
+      danychi wykonuje akcje CRUD a AV jest odpowiedzialny za kompilowanie odpowiedzi. Szablony AV
+      są tworzone z użyciem języków Ruby i HTML.
+    </p>
+  </li>
+  
+  
+  <li>
+    <p>
+      Dla każdego kontrolera istnieje powiązany z nim folder w app/views, który zawiera odpowiednie
+      pliki szablonów. Pliki widoków noszą nazwy zgodne z konwencją RoR. Na przykład widok akcji
+      index kontrolera articles_controler znajdzie się w folderze app/views/articles. Kompletna
+      odpowiedź HTML składa się z pliku ERB, szablonu layoutu i pozostałych widoków częściowych.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Szablony Action View mogą być tworzone na różne sposoby. Jeżeli rozszerzenie pliku to .erb,
+      używane są ERB i HTML. W przypadku rozszerzenia .builder stosowana jest biblioteka XmlMarkup.
+      Szablony ERB wykorzystują tagi <% %> i <%= %> jeżeli potrzebny jest output. Aby wyłączyć
+      początkowe i końcowe whitespace można użyć znaczników <%- i -%> na zmianę z <% i %>.
+      Szablony builder to alternatywa dla ERB najczęściej stosowana podczas pracy z treściami XML.
+      Jbuilder to gem rozwijany przez zespół RoR. Jest podobny do Buildera jednak zamiast XML generuje
+      JSON. RoR aby wyrenderować szablon skompiluje go do metody. Jeśli zostanie on zmodyfikowany
+      framework wykryje zmiany i wykona konieczną rekompilację w trybie development. Partiale to
+      częściowe widoki pozwalające na uproszczenie aplikacji i ponowne użycie fragmentów programu
+      traktowanych jako osobne funkcje. Partiale mogą być również użyte do łatwego generowania
+      części widoku dla całych kolekcji obiektów. Opcja :spacer_template określa jakie elementy
+      należy umieścić pomiędzy instancjami głównego partiala.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Partiale mogą posiadać własne layouty. Różnią się one od layoutów dla akcji kontrolerów jednak
+      działają w podobny sposób. Aby wybrać plik, który powinien zostać użyty należy skorzystać z
+      opcji :layout metody :render.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      Szukając widoków kontroler przeszukuje domyślnie folder app/views. Aby skorzystać z dodatkowych
+      folderów można użyć funkcji prepend_view_path i append_view_path.
+    </p>
+  </li>
+  
+  <li>
+    <p>
+      6 Overview of helpers provided by Action View
+      ...
+    </p>
+  </li>
+  
   <li>
     <p>
     </p>
   </li>
+  
+  
 </ul>
