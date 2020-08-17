@@ -54,13 +54,28 @@
   
   <li>
     <p>
-      6 Overview of helpers provided by Action View
-      ...
+      Moduł AssetTagHelper zawiera metody służące do generowania HTML z linkami obrazów, plików JS,
+      arkuszy stylów i feedsów. Domyślnie linki wskazują na assety z folderu public. Można to zmienić
+      ustawieniem "config.action_controller.asset_host". Dostępne są helpery pozwalające na wykrywanie
+      RSS Atom i JSON oraz generujące linki i ścieżki do obrazów, plików JS i arkuszy styli. Operacje
+      na Atom feed ułatwiają helpery AtomFeedHelper. BenchmarkHelper pomaga w mierzeniu czasu jaki
+      zajmuje wykonanie bloku. CacheHelper pozwala na określenie, które części widoku powinny być
+      cachowane a CaptureHelper umożliwia na korzystanie ze zmiennych w obrębie szablonu. Funkcja
+      Funkcja :content_for może być użyta razem z yield do generowania odpowiednich części layoutu.
+      Oprócz tego istnieją helpery związane z datą, czasem i debugowaniem aplikacji. Wiele helperów
+      związanych jest z tworzeniem formularzy, checkboxów, radio buttonów lub innych pól pozwalających
+      użytkownikowi na wybór jednej lub wielu opcji. NumberHelper zawiera metody związane z liczbami,
+      procentami, numerami telefonów itp. SanitizeHelper usuwa z tekstu niepożądane elementy HTML lub
+      CSS. CsrfHelper zwraca meta tagi  "csrf-param" i "csrf-token" z nazwą parametru csrf i tokenem.
     </p>
   </li>
   
   <li>
     <p>
+      Action View pozwala na renderowanie różnych szablonów w zależności od current locale. Ustawienie
+      I18n.locale pozwala na korzystanie plików z odpowiednim rozszerzeniem. Np jeżeli zostanie wybrana
+      wartość "I18n.locale = :de" RoR użyje pliku "X.de.html". Opcja może być zmieniana w dowolnym
+      momencie co pozwala na łatwiejszą kontrolę nad treściami prezentowanymi użytkownikowi.
     </p>
   </li>
   
