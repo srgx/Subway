@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   devise_for :users
 
-  root 'guides#index'
+  root 'guides#index', as: :guides
 
   # Models
   get 'guides/basics'
